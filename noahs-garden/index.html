@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noah's Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#4B9CD3; --blue-d:#2F7AB0; --navy:#13294B; --orange:#F56600; --orange-l:#FFE3CF;
+  --green:#8CCB6E; --bg:#F4F8FC; --card:#fff; --ink:#1B2433; --muted:#5B6678; --line:#DCE5EF;
+  --good:#1E9E5A; --bad:#D64545;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff}
+.hwrap{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--orange);display:grid;place-items:center;font-size:24px}
+.brand h1{margin:0;font-size:1.35rem}
+.brand p{margin:0;font-size:.85rem;color:#BFD8EE}
+.reset{background:transparent;border:1px solid #4A6488;color:#DCE8F5;border-radius:10px;padding:8px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.reset:hover{background:#1F3A63}
+nav#steps{max-width:1180px;margin:0 auto;padding:0 20px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.step{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:0;background:#1F3A63;color:#fff;font:inherit;text-align:left;cursor:pointer}
+.step .num{width:30px;height:30px;border-radius:50%;background:#2E4E7D;display:grid;place-items:center;font-weight:700;flex:none;font-size:.9rem}
+.step b{font-size:.9rem;display:block}
+.step small{display:block;color:#A9C3DD;font-size:.72rem}
+.step.cur{background:var(--blue)} .step.cur .num{background:#fff;color:var(--blue-d)} .step.cur small{color:#EAF4FC}
+.step.done .num{background:var(--good)}
+.step.locked{opacity:.5;cursor:not-allowed}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:0 16px 24px}
+.intro{margin-bottom:16px}
+.tag{display:inline-block;background:var(--orange-l);color:#B44A00;font-weight:700;font-size:.75rem;padding:4px 10px;border-radius:99px;letter-spacing:.04em;text-transform:uppercase}
+.intro h2{margin:8px 0 6px;font-size:1.6rem;color:var(--navy)}
+.intro p{margin:0;max-width:840px;line-height:1.55;color:#33405A}
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.split.wideL{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+@media(max-width:860px){.split,.split.wideL{grid-template-columns:1fr} nav#steps{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(19,41,75,.06),0 6px 24px rgba(19,41,75,.06);border:1px solid var(--line)}
+.panel{display:flex;flex-direction:column;gap:14px}
+.ph{margin:0;color:var(--navy);font-size:1.1rem}
+.panel p{margin:0;line-height:1.5;font-size:.95rem}
+.hint{margin:8px 0 0;font-size:.82rem;color:var(--muted);text-align:center}
+
+/* garden */
+svg.garden{width:100%;height:auto;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.soil{fill:#F7F2E6}
+.gmin{stroke:#DDD3BD;stroke-width:.04}
+.gmaj{stroke:#BFB193;stroke-width:.09}
+.gnum{font-size:.8px;fill:#8A7E66}
+.plot{fill:var(--green);opacity:.85}
+.fence{fill:none;stroke:#8B5A2B;stroke-width:.35;stroke-linejoin:round}
+.fence.ok{stroke:var(--good)} .fence.over{stroke:var(--bad);stroke-dasharray:.6 .4}
+.lab{font-size:.95px;font-weight:700;fill:var(--navy)}
+.areaLab{font-weight:800;fill:#fff;paint-order:stroke;stroke:#2F6B24;stroke-width:.14px}
+.handle{fill:var(--orange);stroke:#fff;stroke-width:.25;cursor:grab}
+
+/* controls */
+.steppers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stepper label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.stepper .row{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#F8FBFE}
+.sbtn{width:46px;height:46px;border:0;background:#EAF3FB;color:var(--blue-d);font-size:1.4rem;font-weight:700;cursor:pointer;font-family:inherit}
+.sbtn:hover:not(:disabled){background:#D6E8F7}
+.sbtn:disabled{opacity:.35;cursor:not-allowed}
+.stepper output{flex:1;text-align:center;font-weight:700;font-size:1.15rem}
+.stepper output.ro{height:46px;display:grid;place-items:center;color:var(--muted)}
+.meter{background:#F8FBFE;border:1px solid var(--line);border-radius:12px;padding:12px}
+.meterTop{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+.bar{height:14px;background:#E5ECF3;border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--blue);border-radius:99px;transition:width .15s}
+.fill.ok{background:var(--good)} .fill.over{background:var(--bad)}
+.status{font-size:.88rem;margin-top:8px;font-weight:600}
+.status.ok{color:var(--good)} .status.over{color:var(--bad)} .status.under{color:var(--blue-d)}
+.btn{font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);padding:10px 16px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--blue)}
+.btn.big{padding:14px 18px;font-size:1rem;width:100%}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover:not(:disabled){background:var(--blue-d)}
+.btn.orange{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.progress{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted)}
+.dots{display:flex;gap:6px}.dot{width:14px;height:14px;border-radius:50%;background:#E1E8F0}.dot.on{background:var(--orange)}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{background:#EEF5FB;color:var(--navy);font-weight:600;padding:7px 8px;text-align:center;position:sticky;top:0}
+.tbl td{padding:6px 8px;text-align:center;border-bottom:1px solid #EEF2F6}
+.tbl td.hl{color:var(--orange);font-weight:700}
+.tbl tr.best td{background:#FFF1E6;font-weight:700}
+.x{border:0;background:none;color:#A0AABB;font-size:1.1rem;cursor:pointer}
+.think{background:#F3F8FD;border:1px dashed #A9CBE8;border-radius:14px;padding:14px}
+.think h3{margin:0 0 6px;font-size:1rem;color:var(--navy)}
+.think p,.think li{font-size:.92rem;line-height:1.5}
+.think ul{margin:6px 0 12px;padding-left:20px}
+textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0 10px;resize:vertical}
+.reveal{background:#FFF4EC;border-left:4px solid var(--orange);padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:.93rem;line-height:1.5}
+
+/* phase 2 */
+.gwrap{position:relative}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(244,248,252,.75);border-radius:10px;font-weight:700;color:var(--navy);font-size:1.25rem;text-align:center;padding:20px;transition:opacity .25s}
+.overlay small{font-weight:400;font-size:.9rem;color:var(--muted)}
+.overlay.hide{opacity:0;pointer-events:none}
+.timerRow{display:flex;gap:14px;align-items:center}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringBg{fill:none;stroke:#E5ECF3;stroke-width:9}
+.ringFg{fill:none;stroke:var(--orange);stroke-width:9;stroke-linecap:round;stroke-dasharray:276.46}
+.ring.low .ringFg{stroke:var(--bad)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:1.8rem;font-weight:800;color:var(--navy)}
+.ring.low span{color:var(--bad)}
+.areaBox{flex:1;background:#F2FAEE;border:1px solid #CFE8C3;border-radius:14px;padding:12px 14px}
+.areaBox small{color:#4E7A3E;font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.05em}
+#aEq{font-size:1.15rem;font-weight:700;color:#24521A}
+#aEq .big{font-size:1.7rem;color:#1D6B12}
+.btnRow{display:flex;gap:10px}
+.durRow{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)}
+select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--line)}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.result>div{background:#FFF4EC;border-radius:12px;padding:10px 12px}
+.result small{display:block;color:#A2541B;font-size:.75rem;font-weight:600}
+.result b{font-size:1.05rem;color:var(--navy)}
+.result.pop>div{animation:pop .4s}
+@keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:none;opacity:1}}
+details.meas summary{cursor:pointer;font-weight:600;color:var(--navy);padding:4px 0}
+.scroll{max-height:220px;overflow:auto;margin-top:6px;border:1px solid var(--line);border-radius:10px}
+
+/* graph */
+svg.graph{width:100%;height:auto;display:block}
+.gl{stroke:#EDF1F6;stroke-width:1}
+.axis{stroke:#5B6678;stroke-width:1.5}
+.tk{font-size:12px;fill:var(--muted)}
+.axt{font-size:13px;font-weight:600;fill:var(--navy)}
+.curve{fill:none;stroke:var(--orange);stroke-width:3.5;stroke-linecap:round}
+.mypt{fill:var(--orange);stroke:#fff;stroke-width:2}
+.allpt{fill:var(--blue);stroke:#fff;stroke-width:1.5}
+.pin{animation:pin .35s both;transform-box:fill-box;transform-origin:center}
+@keyframes pin{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.cmpline{stroke:var(--blue-d);stroke-width:2.5;stroke-dasharray:7 6}
+.cmplab{font-size:12px;fill:var(--blue-d);font-weight:600}
+.guide{stroke:var(--navy);stroke-width:1;stroke-dasharray:4 4;opacity:.6}
+.cur{fill:var(--navy);stroke:#fff;stroke-width:2.5}
+.curlab{font-size:13px;font-weight:700;fill:var(--navy);paint-order:stroke;stroke:#fff;stroke-width:4px}
+.callout{font-size:13px;font-weight:700;fill:#B44A00;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.gnote{font-size:.85rem;color:var(--muted);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.preds{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pred{border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px;cursor:pointer;font:inherit;font-size:.85rem;font-weight:600;color:var(--navy);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.pred:hover{border-color:var(--blue);background:#F6FAFE}
+.pred svg{width:100%;max-width:120px}
+.pred path{fill:none;stroke:var(--orange);stroke-width:3.5;stroke-linecap:round}
+.pred .ax{stroke:#9AA6B6;stroke-width:1.5}
+.chip{background:#EEF5FB;border-radius:10px;padding:8px 12px;font-size:.9rem}
+.bigReveal{background:linear-gradient(135deg,#FFF1E6,#FFE0C7);border-radius:14px;padding:14px;animation:pop .4s}
+.bigReveal h3{margin:0 0 4px;color:#B44A00;font-size:1.3rem}
+.lbl{display:block;font-size:.9rem;margin-bottom:4px}
+.slider{width:100%;accent-color:var(--orange)}
+.mini{display:flex;gap:14px;align-items:center;margin-top:8px}
+.mini svg{width:96px;flex:none}
+#miniTxt{font-size:.95rem;line-height:1.5}
+.discuss details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.discuss summary{cursor:pointer;font-weight:600;color:var(--navy);font-size:.92rem}
+.discuss details p{margin:8px 0 0;font-size:.9rem;color:#33405A}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.9rem;cursor:pointer}
+.toggle input{accent-color:var(--blue);width:18px;height:18px}
+
+/* phase 4 */
+.eqStep{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;animation:pop .35s}
+.eqStep h4{margin:0 0 4px;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.eqStep p{margin:4px 0}
+.eq{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.45rem;color:var(--navy);margin:6px 0}
+.eq.hero{font-size:2rem;background:#FFF4EC;border-radius:10px;padding:6px 14px;display:inline-block}
+.sub{color:var(--orange);font-weight:700}
+.calc{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.25rem;color:var(--navy);margin-top:6px}
+.small{font-size:.86rem;color:var(--muted)}
+.abc{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.abc label{font-weight:600;font-family:"Cambria Math",Cambria,serif;font-size:1.15rem}
+.abc input,.inl{width:64px;font:inherit;font-size:1.05rem;padding:6px 8px;border:2px solid var(--line);border-radius:8px;text-align:center}
+input.ok{border-color:var(--good);background:#EAF8F0} input.no{border-color:var(--bad);background:#FDEEEE}
+.fb{font-size:.88rem;font-weight:600;margin-top:6px} .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+.celebrate{background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;border-radius:14px;padding:16px;margin-top:10px;animation:pop .4s;line-height:1.5}
+.celebrate b{color:#FFD2B0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand"><div class="logo">🌱</div><div><h1>Noah's Garden</h1><p>50 meters of fence · How big can the garden get?</p></div></div>
+    <div style="display:flex;gap:8px"><a class="reset" href="../" style="text-decoration:none">← All Unit 7 activities</a><button class="reset" id="reset">↺ Start over</button></div>
+  </div>
+  <nav id="steps"></nav>
+</header>
+<main id="stage"></main>
+<footer>Honors Math 1 · Unit 7 Lesson 1 · A Different Kind of Change</footer>
+
+<script>
+(function(){
+const HALF=25, KEY='noahsGarden.v1', C=276.46;
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=n=>{const r=Math.round(n*100)/100;return (Object.is(r,-0)?0:r).toString();};
+const snap=(v,s=0.5)=>Math.round(v/s)*s;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const area=L=>L*(HALF-L);
+const num=v=>parseFloat(String(v).replace(/[−–—]/g,'-').replace(/\s/g,''));
+
+function defaults(){return{
+  unlocked:1, phase:1,
+  p1:{L:10,W:8,saved:[],revealed:false,notice:''},
+  p2:{L:5,duration:30,attempts:[],measured:[]},
+  p3:{prediction:null,plotAll:false,connected:false,exploreL:6,compare:false},
+  p4:{step:1,testL:7,abcOk:false,q1Ok:false,q2Ok:false}
+};}
+let state=defaults();
+try{
+  const d=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(d&&d.p1){const b=defaults();state={...b,...d,p1:{...b.p1,...d.p1},p2:{...b.p2,...d.p2},p3:{...b.p3,...d.p3},p4:{...b.p4,...d.p4}};}
+}catch(e){}
+const params=new URLSearchParams(location.search);
+const teacher=params.has('teacher')||params.has('all');
+if(teacher) state.unlocked=4;
+if(state.phase>state.unlocked) state.phase=state.unlocked;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+/* ---------- navigation ---------- */
+const PHASES=[
+  {n:1,title:'Build',sub:'Use all 50 m'},
+  {n:2,title:'Biggest garden',sub:'Timed challenge'},
+  {n:3,title:'Graph it',sub:'Length vs. area'},
+  {n:4,title:'Equation',sub:'A = L(25 − L)'}
+];
+function renderSteps(){
+  $('#steps').innerHTML=PHASES.map(p=>{
+    const locked=p.n>state.unlocked, cur=p.n===state.phase, done=p.n<state.unlocked&&!cur;
+    return `<button class="step ${cur?'cur':''} ${locked?'locked':''} ${done?'done':''}" data-n="${p.n}" ${locked?'disabled':''}>
+      <span class="num">${locked?'🔒':(done?'✓':p.n)}</span><span><b>${p.title}</b><small>${p.sub}</small></span></button>`;
+  }).join('');
+  $$('#steps .step').forEach(b=>b.onclick=()=>go(+b.dataset.n));
+}
+function go(n){ if(n>state.unlocked) return; stopTimer(); state.phase=n; persist(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function unlock(n){ state.unlocked=Math.max(state.unlocked,n); persist(); renderSteps(); }
+function render(){ renderSteps(); [null,buildP1,buildP2,buildP3,buildP4][state.phase](); }
+$('#reset').onclick=()=>{
+  if(!confirm('Start over? This clears your rectangles and answers on this device.')) return;
+  stopTimer(); state=defaults(); if(teacher) state.unlocked=4; persist(); render();
+};
+
+/* ---------- garden drawing ---------- */
+function gardenMarkup(){
+  let g='';
+  for(let i=0;i<=26;i++){
+    const c=i%5===0?'gmaj':'gmin';
+    g+=`<line x1="${i}" y1="0" x2="${i}" y2="26" class="${c}"/><line x1="0" y1="${i}" x2="26" y2="${i}" class="${c}"/>`;
+    if(i%5===0) g+=`<text x="${i}" y="-0.7" class="gnum" text-anchor="middle">${i}</text><text x="-0.6" y="${i+0.28}" class="gnum" text-anchor="end">${i}</text>`;
+  }
+  return `<svg class="garden" viewBox="-2.4 -2.4 31.4 31.4" role="img" aria-label="Garden grid. Each square is 1 meter by 1 meter.">
+    <rect x="0" y="0" width="26" height="26" class="soil"/>
+    <rect class="plot" x="0" y="0" width="0" height="0"/>
+    <g>${g}</g>
+    <rect class="fence" x="0" y="0" width="0" height="0"/>
+    <text class="lab labL" text-anchor="middle"></text>
+    <text class="lab labW"></text>
+    <text class="areaLab" text-anchor="middle" dominant-baseline="central"></text>
+    <circle class="handle" r="0.75"/>
+  </svg>`;
+}
+function drawGarden(svg,L,W,opt={}){
+  const set=(sel,a)=>{const el=svg.querySelector(sel);for(const k in a)el.setAttribute(k,a[k]);return el;};
+  set('.plot',{width:L,height:W}); set('.fence',{width:L,height:W}); set('.handle',{cx:L,cy:W});
+  const lL=set('.labL',{x:L/2,y:W+1.2}); lL.textContent=`L = ${fmt(L)} m`;
+  const lW=svg.querySelector('.labW'); lW.textContent=`W = ${fmt(W)} m`;
+  if(L+6.6<=28.8){lW.setAttribute('x',L+0.6);lW.setAttribute('text-anchor','start');}
+  else{lW.setAttribute('x',L-0.6);lW.setAttribute('text-anchor','end');}
+  lW.setAttribute('y',W/2+0.3);
+  const a=svg.querySelector('.areaLab');
+  if(opt.showArea){
+    const fs=clamp(Math.min(L/5.6,W/1.4),0,2.4);
+    a.textContent=`${fmt(L*W)} m²`; a.setAttribute('x',L/2); a.setAttribute('y',W/2); a.setAttribute('font-size',fs);
+    a.style.display=fs<0.6?'none':'';
+  } else a.textContent='';
+}
+function bindDrag(svg,onPoint,canDrag=()=>true){
+  let drag=false;
+  const pt=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
+  svg.addEventListener('pointerdown',e=>{if(!canDrag())return;drag=true;svg.setPointerCapture(e.pointerId);onPoint(pt(e));e.preventDefault();});
+  svg.addEventListener('pointermove',e=>{if(drag)onPoint(pt(e));});
+  const end=()=>{if(drag){drag=false;persist();}};
+  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+}
+function stepper(k,label){
+  return `<div class="stepper"><label>${label}</label><div class="row">
+    <button class="sbtn" data-k="${k}" data-d="-0.5" aria-label="Decrease ${label}">−</button>
+    <output id="out${k}"></output>
+    <button class="sbtn" data-k="${k}" data-d="0.5" aria-label="Increase ${label}">+</button></div></div>`;
+}
+
+/* ---------- PHASE 1 ---------- */
+function buildP1(){
+  const s=state.p1;
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Phase 1</span><h2>Build Noah's garden</h2>
+    <p>Noah has <b>50 meters of fencing</b> to completely enclose a rectangular garden. Drag the orange corner (or use the + and − buttons) to make a rectangle that uses <b>exactly 50 m</b> of fence. Save <b>5 different</b> rectangles.</p></div>
+    <div class="split">
+      <div class="card">${gardenMarkup()}<p class="hint">Each small square is 1 m × 1 m.</p></div>
+      <div class="card panel">
+        <div class="steppers">${stepper('L','Length')}${stepper('W','Width')}</div>
+        <div class="meter"><div class="meterTop"><span>Fence used</span><b id="pVal"></b></div><div class="bar"><div class="fill" id="pFill"></div></div><div id="pStatus" class="status"></div></div>
+        <button class="btn primary big" id="saveBtn">Save this rectangle</button>
+        <div class="progress" id="prog"></div>
+        <div id="savedWrap"></div>
+        <div id="noticeWrap"></div>
+      </div>
+    </div></section>`;
+  const svg=$('#stage .garden');
+  bindDrag(svg,p=>{s.L=clamp(snap(p.x),0.5,26);s.W=clamp(snap(p.y),0.5,26);updP1();});
+  $$('#stage .sbtn').forEach(b=>b.onclick=()=>{const k=b.dataset.k;s[k]=clamp(s[k]+(+b.dataset.d),0.5,26);persist();updP1();});
+  $('#saveBtn').onclick=()=>{s.saved.push({L:s.L,W:s.W});s.saved.sort((a,b)=>a.L-b.L);persist();renderSaved();updP1();};
+  renderSaved(); updP1();
+}
+function updP1(){
+  const s=state.p1, P=2*(s.L+s.W), svg=$('#stage .garden');
+  drawGarden(svg,s.L,s.W);
+  $('#outL').textContent=fmt(s.L)+' m'; $('#outW').textContent=fmt(s.W)+' m';
+  $('#pVal').textContent=`${fmt(P)} of 50 m`;
+  let cls,msg;
+  if(P===50){cls='ok';msg='✓ Exactly 50 m. Every bit of fence is used!';}
+  else if(P<50){cls='under';msg=`${fmt(50-P)} m of fence left over. Noah wants to use it all.`;}
+  else{cls='over';msg=`Too much! That needs ${fmt(P-50)} m more fence than Noah has.`;}
+  const f=$('#pFill'); f.style.width=Math.min(P/50,1)*100+'%'; f.className='fill '+cls;
+  const st=$('#pStatus'); st.className='status '+cls; st.textContent=msg;
+  svg.querySelector('.fence').setAttribute('class','fence '+cls);
+  const dup=s.saved.some(r=>r.L===s.L&&r.W===s.W);
+  const btn=$('#saveBtn'); btn.disabled=cls!=='ok'||dup; btn.textContent=dup?'Already saved ✓':'Save this rectangle';
+  const n=s.saved.length;
+  $('#prog').innerHTML=`<div class="dots">${[0,1,2,3,4].map(i=>`<span class="dot ${i<n?'on':''}"></span>`).join('')}</div><span>${n>=5?'5 saved. Nice work!':`Saved ${n} of 5`}</span>`;
+}
+function renderSaved(){
+  const s=state.p1;
+  $('#savedWrap').innerHTML=!s.saved.length?'':`<table class="tbl"><thead><tr><th>Length (m)</th><th>Width (m)</th>${s.revealed?'<th>L + W</th>':''}<th></th></tr></thead><tbody>${
+    s.saved.map((r,i)=>`<tr><td>${fmt(r.L)}</td><td>${fmt(r.W)}</td>${s.revealed?`<td class="hl">${fmt(r.L+r.W)}</td>`:''}<td><button class="x" data-i="${i}" aria-label="Remove">×</button></td></tr>`).join('')}</tbody></table>`;
+  $$('#savedWrap .x').forEach(b=>b.onclick=()=>{s.saved.splice(+b.dataset.i,1);persist();renderSaved();updP1();});
+  if(s.saved.length<5){$('#noticeWrap').innerHTML='';return;}
+  $('#noticeWrap').innerHTML=`<div class="think"><h3>🤔 What do you notice?</h3>
+    <p>Look at the lengths and widths you saved. What is true about <b>every</b> rectangle?</p>
+    <textarea id="noticeTxt" rows="2" placeholder="I notice..."></textarea>
+    ${s.revealed
+      ?`<div class="reveal"><b>Length + width = 25 m every time.</b> That's half of the 50 m fence. The other half covers the opposite two sides. So if you know the length, the width is <b>25 − length</b>.</div>
+        <button class="btn primary big" id="toP2">On to Phase 2: Find the biggest garden →</button>`
+      :`<button class="btn" id="revealP1">Check the pattern</button>`}
+  </div>`;
+  const t=$('#noticeTxt'); t.value=s.notice||''; t.oninput=()=>{s.notice=t.value;persist();};
+  const r=$('#revealP1'); if(r) r.onclick=()=>{s.revealed=true;unlock(2);persist();renderSaved();};
+  const nx=$('#toP2'); if(nx) nx.onclick=()=>go(2);
+}
+
+/* ---------- PHASE 2 ---------- */
+let timer=null, running=false, timeLeft=0, endAt=0;
+function stopTimer(){ if(timer){clearInterval(timer);timer=null;} running=false; }
+function buildP2(){
+  const s=state.p2;
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Phase 2</span><h2>The biggest-garden challenge</h2>
+    <p>Noah wants as much room to plant as possible. The fence is now locked at <b>50 m</b>: change the length and the width adjusts on its own (remember, <b>L + W = 25</b>). Now you can see the <b>area</b>. When you press Start, you have <b id="durTxt">${s.duration} seconds</b> to find the rectangle with the <b>largest area</b> and submit it.</p></div>
+    <div class="split">
+      <div class="card"><div class="gwrap">${gardenMarkup()}<div class="overlay" id="ov"></div></div><p class="hint">Each small square is 1 m². Count the squares inside and that's the area.</p></div>
+      <div class="card panel">
+        <div class="timerRow">
+          <div class="ring" id="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="ringBg"/><circle cx="50" cy="50" r="44" class="ringFg" id="ringFg"/></svg><span id="tNum"></span></div>
+          <div class="areaBox"><small>Area</small><div id="aEq"></div></div>
+        </div>
+        <div class="steppers">${stepper('L','Length')}<div class="stepper"><label>Width (25 − L)</label><div class="row"><output id="outW2" class="ro"></output></div></div></div>
+        <div class="btnRow"><button class="btn primary big" id="startBtn"></button><button class="btn orange big" id="submitBtn">Submit this rectangle</button></div>
+        <div class="durRow"><label for="dur">Timer:</label><select id="dur">${[20,30,45,60].map(d=>`<option value="${d}" ${d===s.duration?'selected':''}>${d} seconds</option>`).join('')}</select></div>
+        <div id="resWrap"></div>
+      </div>
+    </div></section>`;
+  const svg=$('#stage .garden');
+  bindDrag(svg,p=>setL2(clamp(snap(p.x),0.5,24.5)),()=>running);
+  $$('#stage .sbtn').forEach(b=>b.onclick=()=>{if(running)setL2(clamp(s.L+(+b.dataset.d),0.5,24.5));});
+  $('#startBtn').onclick=startChallenge;
+  $('#submitBtn').onclick=()=>submit(false);
+  $('#dur').onchange=e=>{s.duration=+e.target.value;$('#durTxt').textContent=s.duration+' seconds';persist();updP2();};
+  renderResults(false); updP2();
+}
+function setL2(L){const s=state.p2;s.L=L;if(running&&!s.measured.includes(L))s.measured.push(L);updP2();}
+function startChallenge(){
+  const s=state.p2;
+  const opts=[1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24];
+  s.L=opts[Math.floor(Math.random()*opts.length)];
+  if(!s.measured.includes(s.L)) s.measured.push(s.L);
+  running=true; timeLeft=s.duration; endAt=performance.now()+s.duration*1000;
+  timer=setInterval(()=>{timeLeft=Math.max(0,(endAt-performance.now())/1000);if(timeLeft<=0)submit(true);else updTimer();},100);
+  updP2();
+}
+function submit(auto){
+  const s=state.p2; if(!running) return; stopTimer();
+  s.attempts.push({L:s.L,W:HALF-s.L,A:area(s.L),auto:!!auto});
+  unlock(3); persist(); updP2(); renderResults(true);
+}
+function updP2(){
+  const s=state.p2, W=HALF-s.L, svg=$('#stage .garden');
+  drawGarden(svg,s.L,W,{showArea:running});
+  svg.querySelector('.fence').setAttribute('class','fence ok');
+  $('#outL').textContent=fmt(s.L)+' m'; $('#outW2').textContent=fmt(W)+' m';
+  $$('#stage .sbtn').forEach(b=>b.disabled=!running);
+  const last=s.attempts[s.attempts.length-1];
+  $('#aEq').innerHTML=running?`${fmt(s.L)} × ${fmt(W)} = <span class="big">${fmt(s.L*W)}</span> m²`
+    :(last?`${fmt(last.L)} × ${fmt(last.W)} = <span class="big">${fmt(last.A)}</span> m²`:`<span class="big">?</span> m²`);
+  const ov=$('#ov'); ov.className='overlay'+(running?' hide':'');
+  ov.innerHTML=last?`<div>Submitted: ${fmt(last.A)} m²<br><small>Press “Try again” to see if you can beat it.</small></div>`
+    :`<div>Press <span style="color:var(--blue-d)">Start</span> to begin!<br><small>You'll have ${s.duration} seconds.</small></div>`;
+  const sb=$('#startBtn'); sb.style.display=running?'none':''; sb.textContent=last?'↺ Try again':'▶ Start the challenge';
+  $('#submitBtn').style.display=running?'':'none';
+  $('#dur').disabled=running;
+  updTimer();
+}
+function updTimer(){
+  const s=state.p2, fg=$('#ringFg'); if(!fg) return;
+  fg.style.strokeDashoffset=running?C*(1-timeLeft/s.duration):0;
+  $('#tNum').textContent=Math.ceil(running?timeLeft:s.duration);
+  $('#ring').classList.toggle('low',running&&timeLeft<=10);
+}
+function bestAttempt(){const a=state.p2.attempts;return a.length?a.reduce((x,y)=>y.A>x.A?y:x):null;}
+function renderResults(justNow){
+  const s=state.p2;
+  if(!s.attempts.length){$('#resWrap').innerHTML='';return;}
+  const last=s.attempts[s.attempts.length-1], best=bestAttempt();
+  const meas=[...new Set(s.measured)].sort((a,b)=>a-b);
+  $('#resWrap').innerHTML=`
+    <div class="result ${justNow?'pop':''}">
+      <div><small>${last.auto?"Time's up! Submitted":'You submitted'}</small><b>${fmt(last.L)} × ${fmt(last.W)} = ${fmt(last.A)} m²</b></div>
+      <div><small>Your best (${s.attempts.length} ${s.attempts.length===1?'try':'tries'})</small><b>${fmt(best.L)} × ${fmt(best.W)} = ${fmt(best.A)} m²</b></div>
+    </div>
+    <details class="meas"><summary>Rectangles you measured (${meas.length})</summary>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Length (m)</th><th>Width (m)</th><th>Area (m²)</th></tr></thead><tbody>${
+        meas.map(L=>`<tr class="${L===best.L?'best':''}"><td>${fmt(L)}</td><td>${fmt(HALF-L)}</td><td>${fmt(area(L))}</td></tr>`).join('')}</tbody></table></div></details>
+    <div class="think"><h3>🤔 Think about it</h3><ul>
+      <li>What do you notice about the length and width of the rectangles with the <b>greatest</b> area?</li>
+      <li>What would happen if the length and width were <b>equal</b>?</li>
+      <li>Do you think anyone in class beat your area? How could you know for sure?</li></ul>
+      <button class="btn primary big" id="toP3">On to Phase 3: Graph it →</button></div>`;
+  $('#toP3').onclick=()=>go(3);
+}
+
+/* ---------- graph helpers ---------- */
+const G={w:620,h:440,x0:64,x1:600,y0:392,y1:24,Lmax:26,Amax:170};
+const GX=L=>G.x0+(L/G.Lmax)*(G.x1-G.x0);
+const GY=A=>G.y0-(A/G.Amax)*(G.y0-G.y1);
+function graphMarkup(){
+  let ax='';
+  for(let L=0;L<=25;L+=5) ax+=`<line x1="${GX(L)}" y1="${G.y1}" x2="${GX(L)}" y2="${G.y0}" class="gl"/><text x="${GX(L)}" y="${G.y0+20}" text-anchor="middle" class="tk">${L}</text>`;
+  for(let A=0;A<=160;A+=20) ax+=`<line x1="${G.x0}" y1="${GY(A)}" x2="${G.x1}" y2="${GY(A)}" class="gl"/><text x="${G.x0-8}" y="${GY(A)+4}" text-anchor="end" class="tk">${A}</text>`;
+  return `<svg class="graph" viewBox="0 0 ${G.w} ${G.h}" role="img" aria-label="Graph of length versus area">
+    ${ax}
+    <line x1="${G.x0}" y1="${G.y0}" x2="${G.x1}" y2="${G.y0}" class="axis"/><line x1="${G.x0}" y1="${G.y0}" x2="${G.x0}" y2="${G.y1}" class="axis"/>
+    <text x="${(G.x0+G.x1)/2}" y="${G.h-6}" text-anchor="middle" class="axt">Length (m)</text>
+    <text transform="translate(16 ${(G.y0+G.y1)/2}) rotate(-90)" text-anchor="middle" class="axt">Area (m²)</text>
+    <g class="cmp"></g><path class="curve" d=""/><g class="allpts"></g><g class="pts"></g><g class="cursor"></g><g class="callouts"></g>
+  </svg>`;
+}
+function myLengths(){const set=new Set();state.p1.saved.forEach(r=>set.add(r.L));state.p2.measured.forEach(L=>set.add(L));return [...set].sort((a,b)=>a-b);}
+function allLengths(){const a=[];for(let L=0;L<=25;L++)a.push(L);a.push(12.5);return a.sort((x,y)=>x-y);}
+function drawPoints(svg,{mine=false,all=false,animateAll=false}={}){
+  svg.querySelector('.pts').innerHTML=mine?myLengths().map(L=>`<circle class="mypt" cx="${GX(L)}" cy="${GY(area(L))}" r="6.5"><title>(${fmt(L)}, ${fmt(area(L))})</title></circle>`).join(''):'';
+  svg.querySelector('.allpts').innerHTML=all?allLengths().map((L,i)=>`<circle class="allpt ${animateAll?'pin':''}" style="${animateAll?`animation-delay:${i*50}ms`:''}" cx="${GX(L)}" cy="${GY(area(L))}" r="5"><title>(${fmt(L)}, ${fmt(area(L))})</title></circle>`).join(''):'';
+}
+function curveD(){let d='';for(let L=0;L<=25.0001;L+=0.25)d+=(d?'L':'M')+GX(L).toFixed(1)+' '+GY(area(L)).toFixed(1);return d;}
+function drawCurve(svg,show,animate){
+  const p=svg.querySelector('.curve');
+  if(!show){p.setAttribute('d','');return;}
+  p.setAttribute('d',curveD());
+  if(animate){
+    const len=p.getTotalLength();
+    p.style.transition='none';p.style.strokeDasharray=len;p.style.strokeDashoffset=len;p.getBoundingClientRect();
+    p.style.transition='stroke-dashoffset 1.6s ease-in-out';p.style.strokeDashoffset=0;
+  } else {p.style.transition='none';p.style.strokeDasharray='';p.style.strokeDashoffset='';}
+}
+function drawCursor(svg,L){
+  const g=svg.querySelector('.cursor'); if(L==null){g.innerHTML='';return;}
+  const A=area(L), x=GX(L), y=GY(A);
+  const right=L>17, lx=right?x-12:x+12, ly=A>125?y+26:y-12;
+  g.innerHTML=`<line class="guide" x1="${x}" y1="${y}" x2="${x}" y2="${G.y0}"/><line class="guide" x1="${G.x0}" y1="${y}" x2="${x}" y2="${y}"/>
+    <circle class="cur" cx="${x}" cy="${y}" r="8"/><text class="curlab" x="${lx}" y="${ly}" text-anchor="${right?'end':'start'}">(${fmt(L)}, ${fmt(A)})</text>`;
+}
+function drawCallouts(svg,show){
+  svg.querySelector('.callouts').innerHTML=show?`<text class="callout" x="${GX(12.5)}" y="${GY(156.25)-16}" text-anchor="middle">Maximum: (12.5, 156.25)</text>
+    <circle cx="${GX(0)}" cy="${G.y0}" r="7" fill="none" stroke="#B44A00" stroke-width="2.5"/><circle cx="${GX(25)}" cy="${G.y0}" r="7" fill="none" stroke="#B44A00" stroke-width="2.5"/>`:'';
+}
+function drawCompare(svg,show){
+  svg.querySelector('.cmp').innerHTML=show?`<line class="cmpline" x1="${GX(0)}" y1="${GY(25)}" x2="${GX(25)}" y2="${GY(0)}"/><text class="cmplab" x="${GX(0.6)}" y="${GY(25)-10}">Length vs. width: W = 25 − L (linear)</text>`:'';
+}
+
+/* ---------- PHASE 3 ---------- */
+const PRED=[
+  {id:'lineUp',label:'A straight line going up',d:'M10 52 L72 8'},
+  {id:'exp',label:'Curves up faster and faster',d:'M10 52 C 45 50, 62 36, 72 6'},
+  {id:'hill',label:'Goes up, then comes back down',d:'M8 55 Q 40 -27 72 55'},
+  {id:'lineDown',label:'A straight line going down',d:'M10 8 L72 52'}
+];
+function buildP3(){
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Phase 3</span><h2>Graph it: length vs. area</h2>
+    <p>Let's turn each rectangle into a point: <b>length</b> on the x-axis and <b>area</b> on the y-axis.</p></div>
+    <div class="split wideL"><div class="card">${graphMarkup()}<div id="gNote" class="gnote"></div></div>
+    <div class="card panel" id="p3panel"></div></div></section>`;
+  updP3(null);
+}
+function updP3(anim){
+  const s=state.p3, svg=$('#stage .graph'), panel=$('#p3panel'), predicted=!!s.prediction;
+  drawPoints(svg,{mine:predicted,all:s.plotAll,animateAll:anim==='all'});
+  drawCurve(svg,s.connected,anim==='curve');
+  drawCallouts(svg,s.connected);
+  drawCompare(svg,s.connected&&s.compare);
+  drawCursor(svg,s.connected?s.exploreL:null);
+  $('#gNote').innerHTML=!predicted?'Make your prediction to see your points.'
+    :`<span class="lg"><i style="background:var(--orange)"></i>Your rectangles (${myLengths().length})</span>${s.plotAll?'<span class="lg"><i style="background:var(--blue)"></i>Every whole-number length (plus 12.5)</span>':''}`;
+
+  if(!predicted){
+    panel.innerHTML=`<h3 class="ph">Predict first</h3>
+      <p>If we plot <b>length</b> (x) against <b>area</b> (y) for every rectangle made with 50 m of fence, what will the graph look like?</p>
+      <div class="preds">${PRED.map(p=>`<button class="pred" data-id="${p.id}"><svg viewBox="0 0 80 60"><line class="ax" x1="6" y1="56" x2="76" y2="56"/><line class="ax" x1="6" y1="56" x2="6" y2="4"/><path d="${p.d}"/></svg>${p.label}</button>`).join('')}</div>`;
+    $$('.pred',panel).forEach(b=>b.onclick=()=>{s.prediction=b.dataset.id;persist();updP3(null);});
+    return;
+  }
+  const pred=PRED.find(p=>p.id===s.prediction);
+  let h=`<div class="chip">Your prediction: <b>${pred.label}</b></div>`;
+  if(!s.plotAll){
+    h+=`<p>The <b style="color:var(--orange)">orange dots</b> are the rectangles you made in Phases 1 and 2. What do you notice so far?</p>
+      <button class="btn primary big" id="plotAll">Plot every possible length</button>`;
+  } else if(!s.connected){
+    h+=`<p>The <b style="color:var(--blue-d)">blue dots</b> show every whole-number length from 0 m to 25 m, plus 12.5 m. Is the shape what you predicted?</p>
+      <button class="btn primary big" id="connect">Connect the dots</button>`;
+  } else {
+    const right=s.prediction==='hill';
+    h+=`<div class="bigReveal"><h3>It's a parabola!</h3><p>${right?'You predicted it would go up and then come back down. Exactly right!':'The area actually goes <b>up</b> and then comes back <b>down</b>.'} This curved shape is called a <b>parabola</b>. It's not linear and it's not exponential. It's a new kind of function.</p></div>
+      <div><label class="lbl" for="exL">Slide to explore. Length = <b id="exLv"></b></label>
+        <input class="slider" type="range" id="exL" min="0" max="25" step="0.5" value="${s.exploreL}">
+        <div class="mini"><svg id="miniRect" viewBox="-1 -1 27 27"></svg><div id="miniTxt"></div></div></div>
+      <label class="toggle"><input type="checkbox" id="cmp" ${s.compare?'checked':''}> Show length vs. width on the same graph</label>
+      <div class="discuss">
+        <details><summary>Is the graph linear? Is it exponential?</summary><p>Neither. A linear graph changes at a constant rate, and an exponential graph keeps increasing (or keeps decreasing). This graph increases and then decreases.</p></details>
+        <details><summary>For what lengths is the area increasing? Decreasing?</summary><p>The area increases for lengths from 0 m to 12.5 m and decreases from 12.5 m to 25 m.</p></details>
+        <details><summary>What is the maximum, and what does it mean?</summary><p>The maximum is (12.5, 156.25). A 12.5 m by 12.5 m square gives Noah the biggest garden possible: 156.25 m².</p></details>
+        <details><summary>Where does the graph touch the x-axis? What does that mean?</summary><p>At L = 0 and L = 25. One side would be 0 m long, so there's no garden at all and the area is 0.</p></details>
+      </div>
+      <button class="btn primary big" id="toP4">On to Phase 4: Write the equation →</button>`;
+  }
+  panel.innerHTML=h;
+  const pa=$('#plotAll'); if(pa) pa.onclick=()=>{s.plotAll=true;persist();updP3('all');};
+  const cn=$('#connect'); if(cn) cn.onclick=()=>{s.connected=true;unlock(4);persist();updP3('curve');};
+  if(s.connected){
+    drawMini(s.exploreL);
+    $('#exL').oninput=e=>{s.exploreL=+e.target.value;drawMini(s.exploreL);drawCursor(svg,s.exploreL);persist();};
+    $('#cmp').onchange=e=>{s.compare=e.target.checked;drawCompare(svg,s.compare);persist();};
+    $('#toP4').onclick=()=>go(4);
+  }
+}
+function drawMini(L){
+  const W=HALF-L;
+  $('#miniRect').innerHTML=`<rect x="0" y="0" width="25" height="25" style="fill:#F7F2E6;stroke:#E2D8C2;stroke-width:.3"/><rect x="0" y="0" width="${L}" height="${W}" style="fill:var(--green);stroke:#8B5A2B;stroke-width:.7"/>`;
+  $('#miniTxt').innerHTML=`${fmt(L)} m × ${fmt(W)} m<br><b>Area = ${fmt(area(L))} m²</b>`;
+  $('#exLv').textContent=fmt(L)+' m';
+}
+
+/* ---------- PHASE 4 ---------- */
+const calcHTML=L=>`A = ${fmt(L)}(25 − ${fmt(L)}) = ${fmt(L)}(${fmt(HALF-L)}) = <b>${fmt(area(L))} m²</b>`;
+function buildP4(){
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Phase 4</span><h2>Write the equation</h2>
+    <p>Can we write <b>one equation</b> that gives the area for <b>any</b> length? Let's build it step by step.</p></div>
+    <div class="split wideL"><div class="card">${graphMarkup()}</div><div class="card panel" id="p4panel"></div></div></section>`;
+  updP4(false);
+}
+function updP4(scroll){
+  const s=state.p4, svg=$('#stage .graph'), panel=$('#p4panel'), best=bestAttempt();
+  drawPoints(svg,{all:true});
+  drawCurve(svg,s.step>=3,false);
+  drawCursor(svg,s.step>=4?s.testL:null);
+  svg.querySelector('.callouts').innerHTML=s.step>=3?`<text class="callout" x="${GX(15.5)}" y="${GY(160)}" style="font-size:18px">A = L(25 − L)</text>`:'';
+
+  let h=`<div class="eqStep"><h4>Step 1 · Area of a rectangle</h4><div class="eq">A = L · W</div></div>`;
+  if(s.step>=2) h+=`<div class="eqStep"><h4>Step 2 · Use the Phase 1 pattern</h4><p>Every rectangle had L + W = 25. Solve for the width:</p><div class="eq">L + W = 25 &nbsp;→&nbsp; W = 25 − L</div></div>`;
+  if(s.step>=3) h+=`<div class="eqStep"><h4>Step 3 · Substitute</h4><p>Replace W with (25 − L):</p><div class="eq">A = L · <span class="sub">W</span></div><div class="eq hero">A = L(<span class="sub">25 − L</span>)</div><p class="small">The orange curve on the graph is this equation. It passes through every point.</p></div>`;
+  if(s.step>=4) h+=`<div class="eqStep"><h4>Step 4 · Test it</h4><p>Pick a length. Does the equation match the graph?</p>
+    <input class="slider" type="range" id="testL" min="0" max="25" step="0.5" value="${s.testL}"><div class="calc" id="calc">${calcHTML(s.testL)}</div>
+    ${best?`<p class="small" style="margin-top:8px">Your Phase 2 best was ${fmt(best.L)} m × ${fmt(best.W)} m. The equation agrees: ${calcHTML(best.L).replace(/<\/?b>/g,'')} ✓</p>`:''}</div>`;
+  if(s.step>=5) h+=`<div class="eqStep"><h4>Step 5 · Another way to write it</h4><p>Distribute the L:</p>
+    <div class="eq">A = L(25 − L) = <span class="sub">25L − L²</span></div>
+    <p>With the squared term first: <span class="eq" style="font-size:1.2rem">A = −L² + 25L</span></p>
+    <p>A <b>quadratic expression</b> can be written as <b>ax² + bx + c</b>, where a ≠ 0. What are a, b, and c here?</p>
+    <div class="abc"><label>a = <input id="ia" inputmode="decimal" value="${s.abcOk?'-1':''}"></label><label>b = <input id="ib" inputmode="decimal" value="${s.abcOk?'25':''}"></label><label>c = <input id="ic" inputmode="decimal" value="${s.abcOk?'0':''}"></label><button class="btn" id="chkABC">Check</button></div>
+    <div class="fb ${s.abcOk?'ok':''}" id="fbABC">${s.abcOk?'✓ a = −1, b = 25, c = 0. The squared term is what makes it quadratic.':''}</div></div>`;
+  if(s.step>=6) h+=`<div class="eqStep"><h4>Step 6 · Your turn</h4>
+    <p>Noah's neighbor Ava has <b>36 m</b> of fencing for her rectangular garden. Complete her area equation:</p>
+    <div class="eq">A = L( <input class="inl" id="q1" inputmode="decimal" value="${s.q1Ok?'18':''}"> − L)</div>
+    <button class="btn" id="chk1">Check</button><div class="fb ${s.q1Ok?'ok':''}" id="fb1">${s.q1Ok?'✓ With 36 m of fence, L + W = 18.':''}</div>
+    <div id="q2wrap" ${s.q1Ok?'':'hidden'} style="margin-top:12px"><p>What is the <b>largest area</b> Ava's garden can have?</p>
+      <div class="abc"><input class="inl" id="q2" style="width:90px" inputmode="decimal" value="${s.q2Ok?'81':''}"> <span>m²</span><button class="btn" id="chk2">Check</button><button class="btn" id="hint2">Hint</button></div>
+      <div class="fb ${s.q2Ok?'ok':''}" id="fb2">${s.q2Ok?'✓ A 9 m × 9 m square: 9(18 − 9) = 81 m².':''}</div></div>
+    <div class="celebrate" id="done" ${s.q2Ok?'':'hidden'}>🎉 <b>You did it!</b> You modeled Noah's garden with a <b>quadratic function</b>: A = L(25 − L). Hang on to Ava's equation, A = L(18 − L). You might see something very similar later today. 👀</div></div>`;
+  if(s.step<6) h+=`<button class="btn primary big" id="nextStep">Next step →</button>`;
+  panel.innerHTML=h;
+
+  const nx=$('#nextStep'); if(nx) nx.onclick=()=>{s.step++;persist();updP4(true);};
+  const tl=$('#testL'); if(tl) tl.oninput=e=>{s.testL=+e.target.value;$('#calc').innerHTML=calcHTML(s.testL);drawCursor(svg,s.testL);persist();};
+  const ca=$('#chkABC'); if(ca) ca.onclick=()=>{
+    const want={ia:-1,ib:25,ic:0}; let all=true;
+    for(const id in want){const el=$('#'+id), ok=num(el.value)===want[id]; el.className=ok?'ok':'no'; if(!ok) all=false;}
+    const fb=$('#fbABC');
+    if(all){s.abcOk=true;persist();fb.className='fb ok';fb.textContent='✓ a = −1, b = 25, c = 0. The squared term is what makes it quadratic.';}
+    else{fb.className='fb no';fb.textContent=num($('#ia').value)===1?'Look closely at the sign in front of L².':(String($('#ic').value).trim()===''?'There is no constant term. What number does that mean c is?':'Not quite. Match each part of −L² + 25L to ax² + bx + c.');}
+  };
+  const c1=$('#chk1'); if(c1) c1.onclick=()=>{
+    const v=num($('#q1').value), el=$('#q1'), fb=$('#fb1');
+    if(v===18){s.q1Ok=true;persist();el.className='inl ok';fb.className='fb ok';fb.textContent='✓ With 36 m of fence, L + W = 18.';$('#q2wrap').hidden=false;}
+    else{el.className='inl no';fb.className='fb no';fb.textContent=v===36?'Close! Remember, L + W only covers half of the fence.':'Not quite. With 36 m of fence, what do the length and width add up to?';}
+  };
+  const c2=$('#chk2'); if(c2) c2.onclick=()=>{
+    const v=num($('#q2').value), el=$('#q2'), fb=$('#fb2');
+    if(v===81){s.q2Ok=true;persist();el.className='inl ok';fb.className='fb ok';fb.textContent='✓ A 9 m × 9 m square: 9(18 − 9) = 81 m².';$('#done').hidden=false;}
+    else{el.className='inl no';fb.className='fb no';fb.textContent=v===324?'That would be an 18 m × 18 m square, which needs 72 m of fence.':'Not quite. Try the hint!';}
+  };
+  const h2=$('#hint2'); if(h2) h2.onclick=()=>{const fb=$('#fb2');fb.className='fb';fb.textContent='Hint: Noah\'s biggest garden was a square. What square uses exactly 36 m of fence?';};
+  if(scroll){const last=panel.querySelector('.eqStep:last-of-type');if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+
+render();
+})();
+</script>
+</body>
+</html>
