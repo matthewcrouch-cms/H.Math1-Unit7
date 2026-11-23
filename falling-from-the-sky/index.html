@@ -38,7 +38,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:0 16px 24px
 .split.nar{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
 @media(max-width:860px){.split,.split.nar{grid-template-columns:1fr} nav#steps{grid-template-columns:repeat(2,1fr)}}
 .card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(19,41,75,.06),0 6px 24px rgba(19,41,75,.06);border:1px solid var(--line)}
-.sticky{position:sticky;top:12px}
+.sticky{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
 @media(max-width:860px){.sticky{position:static}}
 .panel{display:flex;flex-direction:column;gap:14px}
 .panel p{margin:0;line-height:1.5;font-size:.95rem}
@@ -141,8 +141,9 @@ svg.graph{width:100%;height:auto;display:block}
 .freeze div{font-size:2.2rem;font-weight:800}.freeze small{display:block;font-size:1rem;font-weight:400;color:#BFD8EE;margin-top:8px}
 .desmos{background:#fff;color:var(--navy);border:0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}
 .desmos:hover{background:#EAF3FB}
-.t2{margin-top:12px}.t2 .tbl{font-size:.88rem}.t2 .tbl td,.t2 .tbl th{padding:4px 6px}
-.t2 tr.past td{color:var(--bad)}
+.t2{margin-top:10px;overflow-x:auto}.t2 .tbl{font-size:.9rem}.t2 .tbl td,.t2 .tbl th{padding:5px 6px;white-space:nowrap}
+.t2 .tbl th{text-align:left;font-size:.8rem}.t2 td.past{color:var(--bad)!important;background:#FDEEEE}.t2 td.tall{background:#EEF5FB}
+.t2 .tnote{font-size:.78rem;color:var(--muted);margin-top:4px}
 footer a{color:var(--muted)}
 [hidden]{display:none!important}
 </style>
@@ -475,7 +476,7 @@ function buildS2(){
   $('#stage').innerHTML=`<section>
     <div class="intro"><span class="tag">Stage 2</span><h2>Find the rule</h2>
     <p>The camera recorded the rock for 5 seconds. Can you predict what happens next, and write a rule for <b>any</b> time?</p></div>
-    <div class="split"><div class="card"><div id="gr2"></div><div class="gnote" id="gn2"></div><div class="t2" id="t2"></div></div><div class="card panel" id="p2"></div></div></section>`;
+    <div class="split"><div class="card sticky"><div id="gr2"></div><div class="gnote" id="gn2"></div><div class="t2" id="t2"></div></div><div class="card panel" id="p2"></div></div></section>`;
   g2=Graph($('#gr2'),{tMax:7,yMax:800,yStep:100,yl:'Distance fallen (ft)'});
   upd2(false);
 }
@@ -491,9 +492,13 @@ function draw2(){
   g.layer('curves').innerHTML=pr?`<path class="cv ${s.eqOk?'o':'r'}" d="${g.path(pr.f)}"/>`:'';
   g.layer('labs').innerHTML=(s.p6Ok?`<text class="glab" x="${g.X(6)-8}" y="${g.Y(576)-12}" text-anchor="end" fill="#D64545">6 s: 576 ft?</text>`:'')+(pr?`<text class="glab" x="${g.X(2.4)}" y="${g.Y(560)}" fill="${s.eqOk?'#B44A00':'#D64545'}">d = ${pretty(last)}${s.eqOk?' ✓':''}</text>`:'');
   const rows=[0,1,2,3,4,5].map(t=>({t,d:d16(t),c:t?d16(t)-d16(t-1):null,cls:''}));
-  if(s.p6Ok) rows.push({t:6,d:576,c:176,cls:'past',note:'past the ground!'});
-  if(s.p7Ok) rows.push({t:7,d:784,c:208,cls:'',note:'taller building'});
-  $('#t2').innerHTML=`<table class="tbl"><thead><tr><th>Time (s)</th><th>Distance fallen (ft)</th><th>Change from the second before</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.cls}"><td>${r.t}</td><td class="hl">${r.d}${r.note?` <span class="small">(${r.note})</span>`:''}</td><td class="bl">${r.c==null?'—':'+'+r.c}</td></tr>`).join('')}</tbody></table>`;
+  if(s.p6Ok) rows.push({t:6,d:576,c:176,cls:'past'});
+  if(s.p7Ok) rows.push({t:7,d:784,c:208,cls:'tall'});
+  $('#t2').innerHTML=`<table class="tbl"><tbody>
+    <tr><th>Time (s)</th>${rows.map(r=>`<td class="${r.cls}"><b>${r.t}</b></td>`).join('')}</tr>
+    <tr><th>Distance fallen (ft)</th>${rows.map(r=>`<td class="hl ${r.cls}">${r.d}</td>`).join('')}</tr>
+    <tr><th>Change (ft)</th>${rows.map(r=>`<td class="bl ${r.cls}">${r.c==null?'—':'+'+r.c}</td>`).join('')}</tr>
+  </tbody></table>${s.p6Ok||s.p7Ok?`<div class="tnote">${s.p6Ok?'<span style="color:var(--bad)">■</span> 6 s is past the ground for a 500-ft building. ':''}${s.p7Ok?'<span style="color:var(--blue-d)">■</span> 7 s is for a taller building.':''}</div>`:''}`;
   $('#gn2').innerHTML=`<span class="lg"><i style="background:var(--orange)"></i>Camera data</span>${s.p7Ok?'<span class="lg"><i style="background:var(--blue-d)"></i>Taller building, 7 s</span>':''}${pr&&!s.eqOk?'<span class="lg"><i style="background:var(--bad)"></i>Your last try</span>':''}`;
 }
 function upd2(scroll){
