@@ -314,6 +314,7 @@ function defaults(){return{
 };}
 function merge(d){
   const b=defaults(); if(!d||!d.p1) return b;
+  if(d.p2&&![10,20,30].includes(d.p2.duration)) d.p2.duration=30;
   return {...b,...d,p1:{...b.p1,...d.p1,saved:d.p1.saved||[]},p2:{...b.p2,...d.p2,attempts:(d.p2&&d.p2.attempts)||[],measured:(d.p2&&d.p2.measured)||[]},p3:{...b.p3,...d.p3},
     p4:{...b.p4,...d.p4,table:(d.p4&&d.p4.table)||{},calc:(d.p4&&d.p4.calc)||{},ATries:(d.p4&&d.p4.ATries)||[],BTries:(d.p4&&d.p4.BTries)||[],avaTries:(d.p4&&d.p4.avaTries)||[]}};
 }
@@ -562,7 +563,7 @@ function buildP2(){
         </div>
         <div class="steppers">${stepper('L','Length')}<div class="stepper"><label>Width</label><div class="row"><output id="outW2" class="ro"></output></div></div></div>
         <div class="btnRow"><button class="btn primary big" id="startBtn"></button><button class="btn orange big" id="submitBtn">Submit this rectangle</button></div>
-        ${LIVE?'':`<div class="durRow"><label for="dur">Timer:</label><select id="dur">${[20,30,45,60].map(d=>`<option value="${d}" ${d===s.duration?'selected':''}>${d} seconds</option>`).join('')}</select></div>`}
+        ${LIVE?'':`<div class="durRow"><label for="dur">Timer:</label><select id="dur">${[10,20,30].map(d=>`<option value="${d}" ${d===s.duration?'selected':''}>${d} seconds</option>`).join('')}</select></div>`}
         <div id="resWrap"></div>
       </div>
     </div></section>`;

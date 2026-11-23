@@ -267,11 +267,13 @@ function updTimer(){
 function v2(){
   const R=real(), r=ST.p2, s=p2state(); lastP2k=s.k;
   const rounds=r?r.round:0;
-  const dur=+(LS.get('noahs:dur')||30);
+  let dur=+(LS.get('noahs:dur')||30); if(![10,20,30].includes(dur)) dur=30;
   const attemptsFor=(st,rd)=>((st.work.p2||{}).attempts||[]).filter(a=>rd==='best'?true:a.round===rd);
   const rd=lbRound==='best'?'best':(lbRound==='cur'?rounds:+lbRound);
   const rows=R.map(st=>{const at=attemptsFor(st,rd);const best=at.length?at.reduce((x,y)=>y.A>x.A?y:x):null;return {st,best};});
   const revealed=rd==='best'||!r||rd<rounds||!!r.revealed;
+  const live=s.k==='run'||s.k==='ready';
+  const locked=live&&(rd===rounds||rd==='best');
   const sub=rows.filter(x=>x.best).sort((a,b)=>revealed?(b.best.A-a.best.A):String(a.st.name).localeCompare(b.st.name)), miss=rows.filter(x=>!x.best);
   const topA=sub.length?Math.max(...sub.map(x=>x.best.A)):0;
   const subCur=r?R.filter(st=>attemptsFor(st,rounds).length).length:0;
@@ -280,9 +282,10 @@ function v2(){
     <div class="card"><h2>Leaderboard</h2>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><label class="note" style="margin:0">Show:</label>
         <select id="lbr"><option value="cur" ${lbRound==='cur'?'selected':''}>Current round${rounds?` (${rounds})`:''}</option>${Array.from({length:rounds},(_,i)=>i+1).reverse().map(i=>`<option value="${i}" ${lbRound==String(i)?'selected':''}>Round ${i}</option>`).join('')}<option value="best" ${lbRound==='best'?'selected':''}>Best of all rounds</option></select></div>
-      ${!R.length?none():(!sub.length?'<div class="empty">No submissions yet.</div>':'')}
-      ${R.length&&sub.length&&!revealed?`<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><button class="btn orange big" id="reveal" ${s.k==='run'||s.k==='ready'?'disabled':''}>🎉 Reveal who was closest</button><span class="note" style="margin:0">Areas are hidden on your screen and on students' screens until you reveal.</span></div>`:''}
-      ${R.length?`<table class="tbl lb"><thead><tr><th>#</th><th>Student</th><th class="c">Rectangle</th><th class="c">Their area</th><th class="c">Actual area (m²)</th></tr></thead><tbody>
+      ${!R.length?none():(!sub.length&&!locked?'<div class="empty">No submissions yet.</div>':'')}
+      ${locked?`<div class="empty" style="font-size:1.1rem;color:var(--navy)">🔒 Guesses are hidden until the timer runs out.<br><b>${subCur} / ${R.length}</b> students have locked in.</div>`:''}
+      ${!locked&&R.length&&sub.length&&!revealed?`<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><button class="btn orange big" id="reveal" ${s.k==='run'||s.k==='ready'?'disabled':''}>🎉 Reveal who was closest</button><span class="note" style="margin:0">Areas are hidden on your screen and on students' screens until you reveal.</span></div>`:''}
+      ${!locked&&R.length?`<table class="tbl lb"><thead><tr><th>#</th><th>Student</th><th class="c">Rectangle</th><th class="c">Their area</th><th class="c">Actual area (m²)</th></tr></thead><tbody>
         ${sub.map((x,i)=>`<tr class="${revealed&&x.best.A===topA?'top':''}"><td class="rank">${revealed?i+1:'•'}</td><td>${nameOf(x.st)}</td><td class="c">${fmt(x.best.L)} × ${fmt(x.best.W)}</td><td class="c">${estCell(x.best)}</td><td class="c">${revealed?`<b>${fmt(x.best.A)}</b> ${x.best.A===topA?'<span class="trophy">🏆 closest!</span>':''}`:'<span class="dim">?</span>'}</td></tr>`).join('')}
         ${miss.map(x=>`<tr class="miss"><td class="rank">–</td><td>${nameOf(x.st)}</td><td class="c">—</td><td class="c">—</td><td class="c">not submitted</td></tr>`).join('')}
       </tbody></table>`:''}
@@ -291,7 +294,7 @@ function v2(){
     <div class="card"><h2>Run the challenge</h2>
       <div class="timer"><div class="big" id="tbig">—</div><div class="note" style="margin:0">${r?`Round ${rounds} · ${subCur} / ${R.length} submitted`:'No rounds yet'}</div></div>
       <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
-        <label class="note" style="margin:0">Timer:</label><select id="dur">${[20,30,45,60].map(d=>`<option ${d===dur?'selected':''} value="${d}">${d} seconds</option>`).join('')}</select>
+        <label class="note" style="margin:0">Timer:</label><select id="dur">${[10,20,30].map(d=>`<option ${d===dur?'selected':''} value="${d}">${d} seconds</option>`).join('')}</select>
         <button class="btn orange big" id="go" ${s.k==='run'||s.k==='ready'?'disabled':''}>${rounds?'▶ Start another round':'▶ Start the challenge'}</button>
         <button class="btn" id="stop" ${s.k==='run'||s.k==='ready'?'':'disabled'}>■ End round now</button>
       </div>
