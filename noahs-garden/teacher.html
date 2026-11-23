@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noah's Garden · Teacher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4B9CD3;--blue-d:#2F7AB0;--navy:#13294B;--orange:#F56600;--orange-l:#FFE3CF;--bg:#F4F8FC;--line:#DCE5EF;--muted:#5B6678;--good:#1E9E5A;--bad:#D64545;--ink:#1B2433}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff}
+.hwrap{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--orange);display:grid;place-items:center;font-size:24px}
+.brand h1{margin:0;font-size:1.3rem}.brand p{margin:0;font-size:.85rem;color:#BFD8EE}
+.hb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hbtn{background:transparent;border:1px solid #4A6488;color:#DCE8F5;border-radius:10px;padding:8px 12px;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:none}
+.hbtn:hover{background:#1F3A63}.hbtn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.codebar{max-width:1280px;margin:0 auto;padding:0 20px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.code{background:#fff;color:var(--navy);border-radius:12px;padding:6px 16px;font-weight:800;font-size:2rem;letter-spacing:.25em}
+.joinurl{color:#DCE8F5;font-size:.95rem}.joinurl b{color:#fff}
+.count{margin-left:auto;background:#1F3A63;border-radius:10px;padding:8px 12px;font-size:.9rem}
+main{max-width:1280px;margin:0 auto;padding:18px 16px 40px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(19,41,75,.05),0 6px 20px rgba(19,41,75,.05)}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:800px){.phases{grid-template-columns:repeat(2,1fr)}}
+.ph{border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.ph.cur{border-color:var(--blue);background:#EEF6FD}
+.ph h3{margin:0;font-size:1rem;color:var(--navy)}.ph small{color:var(--muted);font-size:.8rem}
+.ph .here{font-size:.85rem;color:var(--muted)}
+.btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--navy);padding:8px 14px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.orange{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.danger{color:var(--bad)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{padding:12px 18px;font-size:1rem}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{border:0;background:#E6EEF6;color:var(--navy);font:inherit;font-weight:600;padding:8px 14px;border-radius:10px;cursor:pointer}
+.tab.on{background:var(--navy);color:#fff}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.grid2.wl{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+@media(max-width:900px){.grid2,.grid2.wl{grid-template-columns:1fr}}
+h2{margin:0 0 10px;color:var(--navy);font-size:1.1rem}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pill{background:#EEF5FB;border-radius:99px;padding:6px 12px;font-size:.88rem;color:var(--navy)}
+.pill b{color:var(--blue-d)}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{background:#EEF5FB;color:var(--navy);font-weight:600;padding:8px;text-align:left}
+.tbl td{padding:7px 8px;border-bottom:1px solid #EEF2F6;vertical-align:top}
+.tbl td.c,.tbl th.c{text-align:center}
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.sc{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff}
+.sc h4{margin:0 0 6px;font-size:.95rem;color:var(--navy);display:flex;justify-content:space-between;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.ch{background:#F2FAEE;border:1px solid #CFE8C3;border-radius:8px;padding:2px 7px;font-size:.8rem}
+.notice{font-style:italic;color:#33405A;font-size:.85rem;margin-top:6px}
+.dots{display:inline-flex;gap:3px}.dot{width:9px;height:9px;border-radius:50%;background:#E1E8F0}.dot.on{background:var(--orange)}
+.big{font-size:3rem;font-weight:800;color:var(--navy);line-height:1}
+.timer{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.lb td.rank{font-weight:800;color:var(--muted);width:40px}
+.lb tr.top td{background:#FFF1E6}
+.lb tr.miss td{color:#A0AABB}
+.trophy{color:var(--orange);font-weight:700}
+.bars .row{display:grid;grid-template-columns:70px 1fr 40px;gap:10px;align-items:center;margin-bottom:10px}
+.bars svg{width:70px}
+.bars path{fill:none;stroke:var(--orange);stroke-width:3.5;stroke-linecap:round}.bars .ax{stroke:#9AA6B6;stroke-width:1.5}
+.bar{height:26px;background:#E5ECF3;border-radius:8px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:8px}
+.bar span{position:absolute;left:10px;top:4px;font-size:.82rem;font-weight:600;color:var(--navy)}
+svg.graph{width:100%;height:auto;display:block}
+.gl{stroke:#EDF1F6;stroke-width:1}.axis{stroke:#5B6678;stroke-width:1.5}.tk{font-size:12px;fill:var(--muted)}.axt{font-size:13px;font-weight:600;fill:var(--navy)}
+.curve{fill:none;stroke:var(--orange);stroke-width:3.5}.allpt{fill:var(--blue);stroke:#fff;stroke-width:1.5}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:.9rem;cursor:pointer}
+.toggle input{accent-color:var(--blue);width:17px;height:17px}
+.eq{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.05rem}
+.ok{color:var(--good)}.no{color:var(--bad)}.dim{color:#A0AABB}
+.tries{font-size:.75rem;color:var(--muted)}
+.steps{display:inline-flex;gap:3px}.steps i{width:16px;height:8px;border-radius:4px;background:#E1E8F0;display:block}.steps i.on{background:var(--good)}
+.online{display:inline-block;width:9px;height:9px;border-radius:50%;background:#C3CCD8;margin-right:6px}.online.y{background:var(--good)}
+.tag{font-size:.7rem;background:var(--orange-l);color:#B44A00;border-radius:99px;padding:1px 7px;font-weight:600}
+.landing{max-width:480px;margin:40px auto;display:flex;flex-direction:column;gap:14px;text-align:center}
+.landing h2{font-size:1.5rem}
+.err{color:var(--bad);font-weight:600;min-height:1.2em;margin:0}
+.banner{background:#FFF4EC;border:1px solid #FFD2B0;border-radius:12px;padding:10px 12px;font-size:.88rem;color:#7A3A0B;text-align:left}
+.empty{color:var(--muted);font-size:.92rem;padding:10px 0}
+.note{font-size:.85rem;color:var(--muted);margin:6px 0 0}
+select{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand"><div class="logo">🌱</div><div><h1>Lesson 1: Noah's Garden</h1><p>Teacher dashboard</p></div></div>
+    <div class="hb" id="hb"></div>
+  </div>
+  <div class="codebar" id="codebar"></div>
+</header>
+<main id="app"></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDkuZVoCbhVotMLGi_iI8wGYCrRKie8ex8",
+  authDomain: "exponentproperties-7198b.firebaseapp.com",
+  databaseURL: "https://exponentproperties-7198b-default-rtdb.firebaseio.com",
+  projectId: "exponentproperties-7198b",
+  appId: "1:189445254765:web:3e6f1c783f9b6fdfa85964"
+};
+const DB = (() => {
+  const live = !!FIREBASE_CONFIG.databaseURL && typeof firebase !== 'undefined';
+  if (live) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const fdb = firebase.database();
+    let offset = 0;
+    fdb.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+    return {
+      mode: 'live', ts: () => firebase.database.ServerValue.TIMESTAMP, now: () => Date.now() + offset,
+      set: (p, v) => fdb.ref(p).set(v), update: (p, v) => fdb.ref(p).update(v), remove: p => fdb.ref(p).remove(),
+      once: p => fdb.ref(p).once('value').then(s => s.val()),
+      on: (p, cb) => { const r = fdb.ref(p); const h = r.on('value', s => cb(s.val())); return () => r.off('value', h); }
+    };
+  }
+  const KEY = 'noahs:tree', subs = [];
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const get = (t, p) => { const v = p.split('/').reduce((o, k) => (o == null ? null : o[k]), t); return v === undefined ? null : v; };
+  const clone = v => (v == null ? null : JSON.parse(JSON.stringify(v)));
+  const notify = () => { const t = read(); subs.slice().forEach(s => s.cb(clone(get(t, s.p)))); };
+  window.addEventListener('storage', e => { if (e.key === KEY) notify(); });
+  function write(p, v) {
+    const t = read(), ks = p.split('/'); let o = t;
+    ks.slice(0, -1).forEach(k => { if (typeof o[k] !== 'object' || o[k] === null) o[k] = {}; o = o[k]; });
+    if (v === null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
+    localStorage.setItem(KEY, JSON.stringify(t)); notify();
+  }
+  return {
+    mode: 'local', ts: () => Date.now(), now: () => Date.now(),
+    set: (p, v) => { write(p, clone(v)); return Promise.resolve(); },
+    update: (p, v) => { Object.keys(v).forEach(k => write(p + '/' + k, clone(v[k]))); return Promise.resolve(); },
+    remove: p => { write(p, null); return Promise.resolve(); },
+    once: p => Promise.resolve(clone(get(read(), p))),
+    on: (p, cb) => { const s = { p, cb }; subs.push(s); setTimeout(() => { if (subs.includes(s)) cb(clone(get(read(), p))); }, 0); return () => { const i = subs.indexOf(s); if (i >= 0) subs.splice(i, 1); }; }
+  };
+})();
+
+(function(){
+const APP='noahs-garden';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>{const r=Math.round(n*100)/100;return (Object.is(r,-0)?0:r).toString();};
+const area=L=>L*(25-L);
+const LS={get:k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
+const pretty=t=>esc(String(t||'').trim().replace(/^[a-zA-Z]\s*=\s*/,'')).replace(/[lL]/g,'L').replace(/\*/g,' · ').replace(/\^2/g,'²').replace(/-/g,' − ').replace(/\+/g,' + ').replace(/\s+/g,' ').replace(/\(\s/g,'(').replace(/\s\)/g,')').trim();
+const studentURL=()=>new URL('./',location.href).href;
+
+let CODE=null, ST={phase:1,freeze:false,p2:null}, STU={}, unsubs=[], tab=1, userTab=false, hide=!!LS.get('noahs:hide'), showCurve=false, showAreaCol=false, lbRound='cur', tick=null;
+const base=()=>`sessions/${CODE}`;
+
+/* ---------- landing ---------- */
+function landing(msg){
+  unsubs.forEach(u=>u()); unsubs=[]; CODE=null; $('#codebar').innerHTML=''; $('#hb').innerHTML=`<a class="hbtn" href="./">Student view</a>`;
+  const saved=LS.get('noahs:teacher');
+  $('#app').innerHTML=`<div class="landing card">
+    <h2>Start a class session</h2>
+    ${DB.mode==='local'?'<div class="banner"><b>Practice mode:</b> the live connection isn\'t available, so this only syncs with student tabs in this same browser.</div>':''}
+    <p class="note" style="margin:0">Students go to the Noah's Garden page and type the 4-letter code you get.</p>
+    <button class="btn primary big" id="newS">Start a new session</button>
+    ${saved?`<button class="btn big" id="resS">Resume session ${esc(saved.code)}</button>`:''}
+    <p class="err" id="err">${esc(msg||'')}</p></div>`;
+  $('#newS').onclick=newSession;
+  const r=$('#resS'); if(r) r.onclick=()=>resume(saved.code);
+}
+function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
+async function newSession(){
+  try{
+    let code; for(let i=0;i<12;i++){code=genCode(); if(!(await DB.once(`sessions/${code}/state`))) break;}
+    await DB.set(`sessions/${code}`,{app:APP,created:DB.ts(),state:{phase:1,freeze:false}});
+    LS.set('noahs:teacher',{code}); start(code);
+  }catch(e){ $('#err').textContent='Could not reach the database. Check the setup and rules.'; }
+}
+async function resume(code){
+  try{ const st=await DB.once(`sessions/${code}/state`); if(!st){ LS.del('noahs:teacher'); return landing('That session no longer exists.'); } start(code); }
+  catch(e){ $('#err').textContent='Could not reach the database.'; }
+}
+
+/* ---------- dashboard ---------- */
+function start(code){
+  CODE=code; tab=1; userTab=false;
+  unsubs.push(DB.on(`${base()}/state`,st=>{
+    if(!st){ LS.del('noahs:teacher'); return landing('Session ended.'); }
+    const prev=ST.phase; ST={phase:st.phase||1,freeze:!!st.freeze,p2:st.p2||null};
+    if(!userTab||prev!==ST.phase){ tab=ST.phase; userTab=false; }
+    renderAll();
+  }));
+  unsubs.push(DB.on(`${base()}/students`,v=>{ STU=v||{}; renderAll(); }));
+  if(tick) clearInterval(tick);
+  tick=setInterval(()=>{ updTimer(); },200);
+  setInterval(()=>{ if(CODE&&tab===5) renderBody(); },15000);
+}
+function roster(){ return Object.entries(STU).filter(([k,v])=>v&&v.name).map(([sid,v])=>({sid,...v,work:v.work||{}})).sort((a,b)=>(a.joined||0)-(b.joined||0)); }
+const real=()=>roster().filter(s=>!s.demo);
+function nameOf(s){ if(s.demo) return esc(s.name)+' <span class="tag">you</span>'; if(!hide) return esc(s.name); const i=real().findIndex(x=>x.sid===s.sid); return 'Student '+(i+1); }
+const online=s=>s.seen&&DB.now()-s.seen<75000;
+
+function renderAll(){ renderHeader(); renderBody(); }
+function renderHeader(){
+  const n=real().length, on=real().filter(online).length;
+  $('#hb').innerHTML=`
+    <a class="hbtn" target="_blank" href="${esc(studentURL())}?code=${CODE}&name=${encodeURIComponent('Mr. Crouch')}&demo=1">👁 View as student</a>
+    <button class="hbtn ${ST.freeze?'on':''}" id="frz">${ST.freeze?'▶ Unfreeze screens':'⏸ Freeze screens'}</button>
+    <button class="hbtn ${hide?'on':''}" id="hide">${hide?'Show names':'Hide names'}</button>
+    <button class="hbtn" id="end">End session</button>`;
+  $('#codebar').innerHTML=`<div class="code">${CODE}</div><div class="joinurl">Students go to<br><b>${esc(studentURL().replace(/^https?:\/\//,''))}</b></div><div class="count">👥 ${n} joined · ${on} online</div>`;
+  $('#frz').onclick=()=>DB.update(`${base()}/state`,{freeze:!ST.freeze});
+  $('#hide').onclick=()=>{hide=!hide;LS.set('noahs:hide',hide);renderAll();};
+  $('#end').onclick=async()=>{ if(!confirm('End this session? All student work in it will be deleted.')) return; await DB.remove(base()); LS.del('noahs:teacher'); landing('Session ended.'); };
+}
+const PH=[{n:1,t:'Build',s:'Use all 50 m'},{n:2,t:'Biggest garden',s:'Timed challenge'},{n:3,t:'Graph it',s:'Length vs. area'},{n:4,t:'Equation',s:'Write the rule'}];
+function renderBody(){
+  if(!CODE) return;
+  const R=real();
+  const here=n=>R.filter(s=>(s.phase||1)===n).length;
+  let h=`<div class="phases">${PH.map(p=>`<div class="ph ${ST.phase===p.n?'cur':''}"><h3>Phase ${p.n}: ${p.t}</h3><small>${p.s}</small>
+    <span class="here">${here(p.n)} student${here(p.n)===1?'':'s'} on this phase</span>
+    ${ST.phase===p.n?'<button class="btn" disabled>✓ Class is open to here</button>':`<button class="btn ${p.n>ST.phase?'primary':''}" data-move="${p.n}">${p.n>ST.phase?'Open & move class here →':'Move class back here'}</button>`}</div>`).join('')}</div>
+    <div class="tabs">${PH.map(p=>`<button class="tab ${tab===p.n?'on':''}" data-tab="${p.n}">Phase ${p.n} work</button>`).join('')}<button class="tab ${tab===5?'on':''}" data-tab="5">Roster (${R.length})</button></div>
+    <div id="view"></div>`;
+  $('#app').innerHTML=h;
+  $$('[data-move]').forEach(b=>b.onclick=()=>DB.update(`${base()}/state`,{phase:+b.dataset.move}));
+  $$('[data-tab]').forEach(b=>b.onclick=()=>{tab=+b.dataset.tab;userTab=true;renderBody();});
+  [null,v1,v2,v3,v4,v5][tab]();
+}
+const V=html=>{$('#view').innerHTML=html;};
+const none=()=>'<div class="empty">No students have joined yet. Put the code on the board!</div>';
+
+/* Phase 1 */
+function v1(){
+  const R=real(); if(!R.length) return V(none());
+  const done=R.filter(s=>((s.work.p1||{}).saved||[]).length>=5).length, rev=R.filter(s=>(s.work.p1||{}).revealed).length;
+  const map={};
+  R.forEach(s=>((s.work.p1||{}).saved||[]).forEach(r=>{const k=r.L+'x'+r.W;map[k]=map[k]||{L:r.L,W:r.W,n:0};map[k].n++;}));
+  const rows=Object.values(map).sort((a,b)=>a.L-b.L);
+  V(`<div class="pills"><span class="pill">Saved 5 rectangles: <b>${done} / ${R.length}</b></span><span class="pill">Checked the pattern: <b>${rev} / ${R.length}</b></span></div>
+  <div class="grid2">
+    <div class="card"><h2>Class table: every rectangle saved</h2>
+      <label class="toggle" style="margin-bottom:8px"><input type="checkbox" id="areaCol" ${showAreaCol?'checked':''}> Show area column</label>
+      ${rows.length?`<div style="max-height:460px;overflow:auto"><table class="tbl"><thead><tr><th class="c">Length</th><th class="c">Width</th><th class="c">L + W</th>${showAreaCol?'<th class="c">Area</th>':''}<th class="c"># of students</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td class="c">${fmt(r.L)}</td><td class="c">${fmt(r.W)}</td><td class="c">${fmt(r.L+r.W)}</td>${showAreaCol?`<td class="c">${fmt(r.L*r.W)}</td>`:''}<td class="c">${r.n}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No rectangles saved yet.</div>'}
+      <p class="note">Sorted by length so the pattern (L + W = 25, width drops by 1 when length grows by 1) is easy to see.</p></div>
+    <div class="card"><h2>Student work</h2><div class="scards">${R.map(s=>{const p=s.work.p1||{},sv=p.saved||[];return `<div class="sc"><h4><span>${nameOf(s)}</span><span class="dots">${[0,1,2,3,4].map(i=>`<i class="dot ${i<sv.length?'on':''}"></i>`).join('')}</span></h4>
+      <div class="chips">${sv.map(r=>`<span class="ch">${fmt(r.L)} × ${fmt(r.W)}</span>`).join('')||'<span class="dim" style="font-size:.8rem">nothing saved yet</span>'}</div>
+      ${p.notice?`<div class="notice">“${esc(p.notice)}”</div>`:''}</div>`;}).join('')}</div></div>
+  </div>`);
+  $('#areaCol').onchange=e=>{showAreaCol=e.target.checked;v1();};
+}
+
+/* Phase 2 */
+function p2state(){ const r=ST.p2, now=DB.now(); if(!r) return {k:'none'}; if(now<r.startsAt) return {k:'ready',left:(r.startsAt-now)/1000}; if(now<r.endsAt) return {k:'run',left:(r.endsAt-now)/1000}; return {k:'over'}; }
+let lastP2k=null;
+function updTimer(){
+  if(!CODE||tab!==2) return; const el=$('#tbig'); if(!el) return;
+  const s=p2state();
+  el.textContent=s.k==='ready'?'Get ready… '+Math.ceil(s.left):s.k==='run'?Math.ceil(s.left)+' s':s.k==='over'?'Round over':'—';
+  if(s.k!==lastP2k){ lastP2k=s.k; v2(); }
+}
+function v2(){
+  const R=real(), r=ST.p2, s=p2state(); lastP2k=s.k;
+  const rounds=r?r.round:0;
+  const dur=+(LS.get('noahs:dur')||30);
+  const attemptsFor=(st,rd)=>((st.work.p2||{}).attempts||[]).filter(a=>rd==='best'?true:a.round===rd);
+  const rd=lbRound==='best'?'best':(lbRound==='cur'?rounds:+lbRound);
+  const rows=R.map(st=>{const at=attemptsFor(st,rd);const best=at.length?at.reduce((x,y)=>y.A>x.A?y:x):null;return {st,best};});
+  const sub=rows.filter(x=>x.best).sort((a,b)=>b.best.A-a.best.A), miss=rows.filter(x=>!x.best);
+  const subCur=r?R.filter(st=>attemptsFor(st,rounds).length).length:0;
+  V(`<div class="grid2 wl">
+    <div class="card"><h2>Leaderboard</h2>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><label class="note" style="margin:0">Show:</label>
+        <select id="lbr"><option value="cur" ${lbRound==='cur'?'selected':''}>Current round${rounds?` (${rounds})`:''}</option>${Array.from({length:rounds},(_,i)=>i+1).reverse().map(i=>`<option value="${i}" ${lbRound==String(i)?'selected':''}>Round ${i}</option>`).join('')}<option value="best" ${lbRound==='best'?'selected':''}>Best of all rounds</option></select></div>
+      ${!R.length?none():(!sub.length?'<div class="empty">No submissions yet.</div>':'')}
+      ${R.length?`<table class="tbl lb"><thead><tr><th>#</th><th>Student</th><th class="c">Rectangle</th><th class="c">Area (m²)</th></tr></thead><tbody>
+        ${sub.map((x,i)=>`<tr class="${x.best.A===156.25?'top':''}"><td class="rank">${i+1}</td><td>${nameOf(x.st)}</td><td class="c">${fmt(x.best.L)} × ${fmt(x.best.W)}</td><td class="c"><b>${fmt(x.best.A)}</b> ${x.best.A===156.25?'<span class="trophy">🏆 max!</span>':''}</td></tr>`).join('')}
+        ${miss.map(x=>`<tr class="miss"><td class="rank">–</td><td>${nameOf(x.st)}</td><td class="c">—</td><td class="c">not submitted</td></tr>`).join('')}
+      </tbody></table>`:''}
+      <p class="note">Discussion: “Did anyone beat this? How could we know for sure?” Nobody can do better than 12.5 × 12.5 = 156.25.</p>
+    </div>
+    <div class="card"><h2>Run the challenge</h2>
+      <div class="timer"><div class="big" id="tbig">—</div><div class="note" style="margin:0">${r?`Round ${rounds} · ${subCur} / ${R.length} submitted`:'No rounds yet'}</div></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+        <label class="note" style="margin:0">Timer:</label><select id="dur">${[20,30,45,60].map(d=>`<option ${d===dur?'selected':''} value="${d}">${d} seconds</option>`).join('')}</select>
+        <button class="btn orange big" id="go" ${s.k==='run'||s.k==='ready'?'disabled':''}>${rounds?'▶ Start another round':'▶ Start the challenge'}</button>
+        <button class="btn" id="stop" ${s.k==='run'||s.k==='ready'?'':'disabled'}>■ End round now</button>
+      </div>
+      <p class="note">Everyone starts at the same time after a 3-second countdown, from a random lopsided rectangle. When time runs out, each student's current rectangle is submitted automatically.</p>
+      ${ST.phase<2?'<p class="note no">Students are still on Phase 1. Open Phase 2 first.</p>':''}
+    </div></div>`);
+  updTimer();
+  $('#lbr').onchange=e=>{lbRound=e.target.value;v2();};
+  $('#dur').onchange=e=>LS.set('noahs:dur',+e.target.value);
+  $('#go').onclick=()=>{const d=+$('#dur').value; LS.set('noahs:dur',d); const now=DB.now(); lbRound='cur'; DB.update(`${base()}/state`,{p2:{round:rounds+1,duration:d,startsAt:now+3500,endsAt:now+3500+d*1000}});};
+  $('#stop').onclick=()=>DB.update(`${base()}/state/p2`,{endsAt:DB.now()});
+}
+
+/* Phase 3 */
+const PRED=[
+  {id:'lineUp',label:'Straight line going up',d:'M10 52 L72 8'},
+  {id:'exp',label:'Curves up faster and faster',d:'M10 52 C 45 50, 62 36, 72 6'},
+  {id:'hill',label:'Goes up, then comes back down',d:'M8 55 Q 40 -27 72 55'},
+  {id:'lineDown',label:'Straight line going down',d:'M10 8 L72 52'}
+];
+const G={w:620,h:440,x0:64,x1:600,y0:392,y1:24,Lmax:26,Amax:170};
+const GX=L=>G.x0+(L/G.Lmax)*(G.x1-G.x0), GY=A=>G.y0-(A/G.Amax)*(G.y0-G.y1);
+function classLengths(){const set=new Set();real().forEach(s=>{((s.work.p1||{}).saved||[]).forEach(r=>{if(r.L+r.W===25)set.add(r.L);});((s.work.p2||{}).measured||[]).forEach(L=>set.add(L));});return [...set].filter(L=>L>=0&&L<=25).sort((a,b)=>a-b);}
+function graph(){
+  let ax='';
+  for(let L=0;L<=25;L+=5) ax+=`<line x1="${GX(L)}" y1="${G.y1}" x2="${GX(L)}" y2="${G.y0}" class="gl"/><text x="${GX(L)}" y="${G.y0+20}" text-anchor="middle" class="tk">${L}</text>`;
+  for(let A=0;A<=160;A+=20) ax+=`<line x1="${G.x0}" y1="${GY(A)}" x2="${G.x1}" y2="${GY(A)}" class="gl"/><text x="${G.x0-8}" y="${GY(A)+4}" text-anchor="end" class="tk">${A}</text>`;
+  let d=''; if(showCurve){for(let L=0;L<=25.001;L+=.25)d+=(d?'L':'M')+GX(L).toFixed(1)+' '+GY(area(L)).toFixed(1);}
+  const pts=classLengths();
+  return `<svg class="graph" viewBox="0 0 ${G.w} ${G.h}">${ax}<line x1="${G.x0}" y1="${G.y0}" x2="${G.x1}" y2="${G.y0}" class="axis"/><line x1="${G.x0}" y1="${G.y0}" x2="${G.x0}" y2="${G.y1}" class="axis"/>
+    <text x="${(G.x0+G.x1)/2}" y="${G.h-6}" text-anchor="middle" class="axt">Length (m)</text><text transform="translate(16 ${(G.y0+G.y1)/2}) rotate(-90)" text-anchor="middle" class="axt">Area (m²)</text>
+    <path class="curve" d="${d}"/>${pts.map(L=>`<circle class="allpt" cx="${GX(L)}" cy="${GY(area(L))}" r="6"><title>(${fmt(L)}, ${fmt(area(L))})</title></circle>`).join('')}</svg>
+    <p class="note" style="text-align:center">${pts.length} different rectangles from your class</p>`;
+}
+function v3(){
+  const R=real(); if(!R.length) return V(none());
+  const cnt={}; PRED.forEach(p=>cnt[p.id]=0); let noP=0;
+  R.forEach(s=>{const p=(s.work.p3||{}).prediction; if(p&&cnt[p]!=null)cnt[p]++; else noP++;});
+  const mx=Math.max(1,...Object.values(cnt));
+  const plotted=R.filter(s=>(s.work.p3||{}).plotAll).length, conn=R.filter(s=>(s.work.p3||{}).connected).length;
+  V(`<div class="pills"><span class="pill">Predicted: <b>${R.length-noP} / ${R.length}</b></span><span class="pill">Plotted class points: <b>${plotted}</b></span><span class="pill">Connected the dots: <b>${conn}</b></span></div>
+  <div class="grid2">
+    <div class="card"><h2>Predictions</h2><div class="bars">${PRED.map(p=>`<div class="row"><svg viewBox="0 0 80 60"><line class="ax" x1="6" y1="56" x2="76" y2="56"/><line class="ax" x1="6" y1="56" x2="6" y2="4"/><path d="${p.d}"/></svg><div class="bar"><i style="width:${cnt[p.id]/mx*100}%"></i><span>${p.label}</span></div><b>${cnt[p.id]}</b></div>`).join('')}</div>
+      ${noP?`<p class="note">${noP} haven't predicted yet.</p>`:''}
+      <p class="note">Who predicted a line? Ask them why. That's the misconception the graph breaks.</p></div>
+    <div class="card"><h2>Class graph</h2><label class="toggle" style="margin-bottom:6px"><input type="checkbox" id="crv" ${showCurve?'checked':''}> Show the parabola</label>${graph()}</div>
+  </div>`);
+  $('#crv').onchange=e=>{showCurve=e.target.checked;v3();};
+}
+
+/* Phase 4 */
+function v4(){
+  const R=real(); if(!R.length) return V(none());
+  const P=s=>s.work.p4||{};
+  const keys=[['tableOk','Table'],['calcOk','Show calc'],['WOk','Width'],['AOk','Area equation'],['BOk','No parentheses'],['abcOk','a, b, c'],['avaOk','Ava equation'],['avaMaxOk','Ava max']];
+  const wrong={};
+  R.forEach(s=>{const p=P(s);(p.ATries||[]).forEach(t=>{if(p.AOk&&t===p.A)return;const k=pretty(t);if(!k)return;wrong[k]=(wrong[k]||0)+1;});});
+  const wl=Object.entries(wrong).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const cell=(ok,txt,tries)=>!txt?'<span class="dim">—</span>':`<span class="eq ${ok?'ok':'no'}">${pretty(txt)}</span>${ok?' ✓':''}${tries>1?` <span class="tries">(${tries} tries)</span>`:''}`;
+  V(`<div class="pills">${keys.map(([k,l])=>`<span class="pill">${l}: <b>${R.filter(s=>P(s)[k]).length}</b></span>`).join('')}</div>
+  <div class="grid2 wl">
+    <div class="card"><h2>Student equations</h2><div style="overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Progress</th><th>Width</th><th>Area equation</th><th>No parentheses</th><th>Ava's equation</th><th class="c">Ava max</th></tr></thead><tbody>
+      ${R.map(s=>{const p=P(s), at=p.ATries||[], last=p.AOk?p.A:at[at.length-1];
+        return `<tr><td>${nameOf(s)}</td><td><span class="steps">${keys.map(([k])=>`<i class="${p[k]?'on':''}"></i>`).join('')}</span></td>
+          <td>${cell(p.WOk,p.W,0)}</td><td>${cell(p.AOk,last,at.length)}</td><td>${cell(p.BOk,p.BOk?p.B:(p.BTries||[]).slice(-1)[0],(p.BTries||[]).length)}</td>
+          <td>${cell(p.avaOk,p.avaOk?p.ava:(p.avaTries||[]).slice(-1)[0],(p.avaTries||[]).length)}</td><td class="c">${p.avaMaxOk?'<span class="ok">81 ✓</span>':(p.avaMax?`<span class="no">${esc(p.avaMax)}</span>`:'<span class="dim">—</span>')}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    <p class="note">Green = correct, red = their latest try. Look for students who wrote L(25 − L) and others who wrote 25L − L². Ask them to share and compare.</p></div>
+    <div class="card"><h2>Common wrong area equations</h2>
+      ${wl.length?`<table class="tbl"><tbody>${wl.map(([k,n])=>`<tr><td class="eq no">A = ${k}</td><td class="c"><b>${n}</b></td></tr>`).join('')}</tbody></table>`:'<div class="empty">None yet.</div>'}
+      <p class="note">Great for a “What went wrong here?” discussion. Try L · 25 − L (missing parentheses) or 25 − L (that's the width).</p></div>
+  </div>`);
+}
+
+/* Roster */
+function v5(){
+  const R=roster(); if(!R.length) return V(none());
+  const ago=t=>{if(!t)return '—';const s=Math.round((DB.now()-t)/1000);return s<60?'just now':s<3600?Math.round(s/60)+' min ago':'over an hour ago';};
+  V(`<div class="card"><h2>Roster</h2><table class="tbl"><thead><tr><th>Student</th><th class="c">On phase</th><th>Last active</th><th></th></tr></thead><tbody>
+    ${R.map(s=>`<tr><td><span class="online ${online(s)?'y':''}"></span>${nameOf(s)}</td><td class="c">${s.phase||1}</td><td>${ago(s.seen)}</td><td style="text-align:right"><button class="btn danger" data-kick="${s.sid}">Remove</button></td></tr>`).join('')}
+  </tbody></table><p class="note">Remove a duplicate or misspelled name. That student is sent back to the join screen to rejoin. A student who rejoins with the same name gets their work back.</p></div>`);
+  $$('[data-kick]').forEach(b=>b.onclick=async()=>{ if(!confirm('Remove this student and their work from the session?')) return; await DB.set(`${base()}/kicked/${b.dataset.kick}`,true); await DB.remove(`${base()}/students/${b.dataset.kick}`); });
+}
+
+const saved=LS.get('noahs:teacher');
+if(saved&&new URLSearchParams(location.search).has('resume')) resume(saved.code); else landing();
+})();
+</script>
+</body>
+</html>
