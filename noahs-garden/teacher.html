@@ -271,18 +271,22 @@ function v2(){
   const attemptsFor=(st,rd)=>((st.work.p2||{}).attempts||[]).filter(a=>rd==='best'?true:a.round===rd);
   const rd=lbRound==='best'?'best':(lbRound==='cur'?rounds:+lbRound);
   const rows=R.map(st=>{const at=attemptsFor(st,rd);const best=at.length?at.reduce((x,y)=>y.A>x.A?y:x):null;return {st,best};});
-  const sub=rows.filter(x=>x.best).sort((a,b)=>b.best.A-a.best.A), miss=rows.filter(x=>!x.best);
+  const revealed=rd==='best'||!r||rd<rounds||!!r.revealed;
+  const sub=rows.filter(x=>x.best).sort((a,b)=>revealed?(b.best.A-a.best.A):String(a.st.name).localeCompare(b.st.name)), miss=rows.filter(x=>!x.best);
+  const topA=sub.length?Math.max(...sub.map(x=>x.best.A)):0;
   const subCur=r?R.filter(st=>attemptsFor(st,rounds).length).length:0;
+  const estCell=b=>b.est==null?'<span class="dim">—</span>':(revealed?`<span class="${b.est===b.A?'ok':'no'}">${fmt(b.est)}${b.est===b.A?' ✓':''}</span>`:'<span class="dim">hidden</span>');
   V(`<div class="grid2 wl">
     <div class="card"><h2>Leaderboard</h2>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><label class="note" style="margin:0">Show:</label>
         <select id="lbr"><option value="cur" ${lbRound==='cur'?'selected':''}>Current round${rounds?` (${rounds})`:''}</option>${Array.from({length:rounds},(_,i)=>i+1).reverse().map(i=>`<option value="${i}" ${lbRound==String(i)?'selected':''}>Round ${i}</option>`).join('')}<option value="best" ${lbRound==='best'?'selected':''}>Best of all rounds</option></select></div>
       ${!R.length?none():(!sub.length?'<div class="empty">No submissions yet.</div>':'')}
-      ${R.length?`<table class="tbl lb"><thead><tr><th>#</th><th>Student</th><th class="c">Rectangle</th><th class="c">Area (m²)</th></tr></thead><tbody>
-        ${sub.map((x,i)=>`<tr class="${x.best.A===156.25?'top':''}"><td class="rank">${i+1}</td><td>${nameOf(x.st)}</td><td class="c">${fmt(x.best.L)} × ${fmt(x.best.W)}</td><td class="c"><b>${fmt(x.best.A)}</b> ${x.best.A===156.25?'<span class="trophy">🏆 max!</span>':''}</td></tr>`).join('')}
-        ${miss.map(x=>`<tr class="miss"><td class="rank">–</td><td>${nameOf(x.st)}</td><td class="c">—</td><td class="c">not submitted</td></tr>`).join('')}
+      ${R.length&&sub.length&&!revealed?`<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap"><button class="btn orange big" id="reveal" ${s.k==='run'||s.k==='ready'?'disabled':''}>🎉 Reveal who was closest</button><span class="note" style="margin:0">Areas are hidden on your screen and on students' screens until you reveal.</span></div>`:''}
+      ${R.length?`<table class="tbl lb"><thead><tr><th>#</th><th>Student</th><th class="c">Rectangle</th><th class="c">Their area</th><th class="c">Actual area (m²)</th></tr></thead><tbody>
+        ${sub.map((x,i)=>`<tr class="${revealed&&x.best.A===topA?'top':''}"><td class="rank">${revealed?i+1:'•'}</td><td>${nameOf(x.st)}</td><td class="c">${fmt(x.best.L)} × ${fmt(x.best.W)}</td><td class="c">${estCell(x.best)}</td><td class="c">${revealed?`<b>${fmt(x.best.A)}</b> ${x.best.A===topA?'<span class="trophy">🏆 closest!</span>':''}`:'<span class="dim">?</span>'}</td></tr>`).join('')}
+        ${miss.map(x=>`<tr class="miss"><td class="rank">–</td><td>${nameOf(x.st)}</td><td class="c">—</td><td class="c">—</td><td class="c">not submitted</td></tr>`).join('')}
       </tbody></table>`:''}
-      <p class="note">Discussion: “Did anyone beat this? How could we know for sure?” Nobody can do better than 12.5 × 12.5 = 156.25.</p>
+      <p class="note">${revealed?'Discussion: “Did anyone beat this? How could we know for sure?” The biggest possible is 12.5 × 12.5 = 156.25 m².':'“Their area” is the area the student calculated or estimated (optional). After you reveal, it shows whether they got it right.'}</p>
     </div>
     <div class="card"><h2>Run the challenge</h2>
       <div class="timer"><div class="big" id="tbig">—</div><div class="note" style="margin:0">${r?`Round ${rounds} · ${subCur} / ${R.length} submitted`:'No rounds yet'}</div></div>
@@ -291,11 +295,12 @@ function v2(){
         <button class="btn orange big" id="go" ${s.k==='run'||s.k==='ready'?'disabled':''}>${rounds?'▶ Start another round':'▶ Start the challenge'}</button>
         <button class="btn" id="stop" ${s.k==='run'||s.k==='ready'?'':'disabled'}>■ End round now</button>
       </div>
-      <p class="note">Everyone starts at the same time after a 3-second countdown, from a random lopsided rectangle. When time runs out, each student's current rectangle is submitted automatically.</p>
+      <p class="note">Everyone starts at the same time after a 3-second countdown, from a random lopsided rectangle. Students <b>can't see the area</b>, so they have to count, calculate, or estimate. When time runs out, each student's current rectangle is submitted automatically.</p>
       ${ST.phase<2?'<p class="note no">Students are still on Phase 1. Open Phase 2 first.</p>':''}
     </div></div>`);
   updTimer();
   $('#lbr').onchange=e=>{lbRound=e.target.value;v2();};
+  const rv=$('#reveal'); if(rv) rv.onclick=()=>DB.update(`${base()}/state/p2`,{revealed:true});
   $('#dur').onchange=e=>LS.set('noahs:dur',+e.target.value);
   $('#go').onclick=()=>{const d=+$('#dur').value; LS.set('noahs:dur',d); const now=DB.now(); lbRound='cur'; DB.update(`${base()}/state`,{p2:{round:rounds+1,duration:d,startsAt:now+3500,endsAt:now+3500+d*1000}});};
   $('#stop').onclick=()=>DB.update(`${base()}/state/p2`,{endsAt:DB.now()});
@@ -322,13 +327,29 @@ function graph(){
     <path class="curve" d="${d}"/>${pts.map(L=>`<circle class="allpt" cx="${GX(L)}" cy="${GY(area(L))}" r="6"><title>(${fmt(L)}, ${fmt(area(L))})</title></circle>`).join('')}</svg>
     <p class="note" style="text-align:center">${pts.length} different rectangles from your class</p>`;
 }
+function guessList(){
+  const out=[];
+  real().forEach(st=>{const at=((st.work.p2||{}).attempts)||[], byR={}; at.forEach((a,i)=>{ if(a&&a.L!=null) byR[a.round==null?'i'+i:'r'+a.round]=a; });
+    const seen=new Set(); Object.values(byR).forEach(a=>{ if(seen.has(a.L)) return; seen.add(a.L); out.push({st,L:a.L,W:25-a.L,A:area(a.L)}); });});
+  return out.sort((a,b)=>b.A-a.A||a.L-b.L);
+}
+function guessCard(){
+  const list=guessList(); if(!list.length) return '<div class="card"><h2>Class guesses from Phase 2</h2><div class="empty">No Phase 2 submissions yet.</div></div>';
+  const max=list[0].A;
+  let g=''; for(let i=0;i<=25;i+=5) g+=`<line x1="${i}" y1="0" x2="${i}" y2="25" stroke="#BFB193" stroke-width=".09"/><line x1="0" y1="${i}" x2="25" y2="${i}" stroke="#BFB193" stroke-width=".09"/><text x="${i}" y="-0.7" font-size=".8" fill="#8A7E66" text-anchor="middle">${i}</text><text x="-0.6" y="${i+.28}" font-size=".8" fill="#8A7E66" text-anchor="end">${i}</text>`;
+  const ord=[...list].sort((a,b)=>(a.A===max)-(b.A===max));
+  return `<div class="card"><h2>Class guesses from Phase 2</h2><p class="note" style="margin:0 0 8px">This is the first thing students see in Phase 3: every rectangle, drawn from the same corner, biggest area first.</p>
+    <div class="grid2"><svg viewBox="-2.4 -2.4 29.8 29.8" style="width:100%"><rect width="25" height="25" fill="#F7F2E6"/>${g}${ord.map(r=>`<rect width="${r.L}" height="${r.W}" fill="rgba(140,203,110,.07)" stroke="${r.A===max?'#F56600':'#4B9CD3'}" stroke-width="${r.A===max?.4:.18}" opacity="${r.A===max?1:.75}"><title>${fmt(r.L)} × ${fmt(r.W)}</title></rect>`).join('')}</svg>
+    <div style="max-height:360px;overflow:auto"><table class="tbl"><tbody>${list.map(r=>`<tr class="${r.A===max?'top':''}" style="${r.A===max?'background:#FFF1E6':''}"><td>${nameOf(r.st)}</td><td class="c">${fmt(r.L)} × ${fmt(r.W)}</td><td class="c"><b>${fmt(r.A)}</b>${r.A===max?' 🏆':''}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+}
 function v3(){
   const R=real(); if(!R.length) return V(none());
   const cnt={}; PRED.forEach(p=>cnt[p.id]=0); let noP=0;
   R.forEach(s=>{const p=(s.work.p3||{}).prediction; if(p&&cnt[p]!=null)cnt[p]++; else noP++;});
   const mx=Math.max(1,...Object.values(cnt));
   const plotted=R.filter(s=>(s.work.p3||{}).plotAll).length, conn=R.filter(s=>(s.work.p3||{}).connected).length;
-  V(`<div class="pills"><span class="pill">Predicted: <b>${R.length-noP} / ${R.length}</b></span><span class="pill">Plotted class points: <b>${plotted}</b></span><span class="pill">Connected the dots: <b>${conn}</b></span></div>
+  const seenG=R.filter(s=>(s.work.p3||{}).seenGuesses).length;
+  V(`${guessCard()}<div style="height:14px"></div><div class="pills"><span class="pill">Looked at guesses: <b>${seenG} / ${R.length}</b></span><span class="pill">Predicted: <b>${R.length-noP} / ${R.length}</b></span><span class="pill">Plotted class points: <b>${plotted}</b></span><span class="pill">Connected the dots: <b>${conn}</b></span></div>
   <div class="grid2">
     <div class="card"><h2>Predictions</h2><div class="bars">${PRED.map(p=>`<div class="row"><svg viewBox="0 0 80 60"><line class="ax" x1="6" y1="56" x2="76" y2="56"/><line class="ax" x1="6" y1="56" x2="6" y2="4"/><path d="${p.d}"/></svg><div class="bar"><i style="width:${cnt[p.id]/mx*100}%"></i><span>${p.label}</span></div><b>${cnt[p.id]}</b></div>`).join('')}</div>
       ${noP?`<p class="note">${noP} haven't predicted yet.</p>`:''}

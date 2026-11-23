@@ -221,6 +221,14 @@ input.ok{border-color:var(--good);background:#EAF8F0} input.no{border-color:var(
 .freeze{position:fixed;inset:0;background:rgba(19,41,75,.94);color:#fff;display:grid;place-items:center;text-align:center;z-index:50;padding:20px}
 .freeze div{font-size:2.2rem;font-weight:800}
 .freeze small{display:block;font-size:1rem;font-weight:400;color:#BFD8EE;margin-top:8px}
+.estRow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.85rem;color:#4E7A3E;font-weight:600;flex-wrap:wrap}
+.estRow input{width:90px;font:inherit;font-size:1.05rem;padding:5px 8px;border:2px solid #CFE8C3;border-radius:8px;text-align:center}
+.glist{max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.glist .gi{display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #EEF2F6;font-size:.95rem}
+.glist .gi.me{background:#EEF5FB;font-weight:700}.glist .gi.top{background:#FFF1E6}
+.glist .gi b{color:var(--navy)}
+.gr{fill:rgba(140,203,110,.07);stroke:var(--blue);stroke-width:.18;opacity:.75}
+.gr.me{stroke:var(--navy);stroke-width:.32;opacity:1}.gr.top{stroke:var(--orange);stroke-width:.4;opacity:1}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -301,7 +309,7 @@ function defaults(){return{
   unlocked:1, phase:1,
   p1:{L:10,W:8,saved:[],revealed:false,notice:''},
   p2:{L:5,duration:30,attempts:[],measured:[]},
-  p3:{prediction:null,plotAll:false,connected:false,exploreL:6,compare:false},
+  p3:{seenGuesses:false,prediction:null,plotAll:false,connected:false,exploreL:6,compare:false},
   p4:{step:1,table:{},tableOk:false,calc:{},calcOk:false,W:'',WOk:false,A:'',AOk:false,ATries:[],B:'',BOk:false,BTries:[],abcOk:false,ava:'',avaOk:false,avaTries:[],avaMax:'',avaMaxOk:false}
 };}
 function merge(d){
@@ -389,10 +397,10 @@ function startLive(){
     if(firstState){ firstState=false; state.phase=CLS.phase; persist(); render(); return; }
     if(CLS.phase!==prevPhase){ go(CLS.phase); return; }
     renderSteps();
-    if(state.phase===2&&JSON.stringify(CLS.p2||null)!==prevP2) liveTick(true);
+    if(state.phase===2&&JSON.stringify(CLS.p2||null)!==prevP2){ liveTick(true); if($('#resWrap')) renderResults(false); }
   }));
   unsubs.push(DB.on(`${base()}/kicked/${LIVE.sid}`,k=>{ if(k){ DB.remove(`${base()}/kicked/${LIVE.sid}`); LS.del('noahs:live'); LIVE=null; showJoin('You were removed from the class. Rejoin with your correct name.'); } }));
-  unsubs.push(DB.on(`${base()}/students`,v=>{ classStudents=v||{}; if(state.phase===3&&LIVE) refreshClassPoints(); }));
+  unsubs.push(DB.on(`${base()}/students`,v=>{ classStudents=v||{}; if(state.phase===3&&LIVE){ if(!state.p3.seenGuesses) refreshGuesses(); else refreshClassPoints(); } }));
   heartbeat=setInterval(()=>{ if(LIVE) DB.update(`${base()}/students/${LIVE.sid}`,{seen:DB.ts(),phase:state.phase}).catch(()=>{}); },30000);
   renderHeader();
 }
@@ -544,13 +552,13 @@ function buildP2(){
   const s=state.p2;
   $('#stage').innerHTML=`<section>
     <div class="intro"><span class="tag">Phase 2</span><h2>The biggest-garden challenge</h2>
-    <p>Noah wants as much room to plant as possible. The fence is now locked at <b>50 m</b>: change the length and the width adjusts on its own. Now you can see the <b>area</b>. ${LIVE?'When Mr. Crouch starts the challenge':'When you press Start'}, you have <b id="durTxt">${curDur()} seconds</b> to find the rectangle with the <b>largest area</b> and submit it.</p></div>
+    <p>Noah wants as much room to plant as possible. The fence is now locked at <b>50 m</b>: change the length and the width adjusts on its own. ${LIVE?'When Mr. Crouch starts the challenge':'When you press Start'}, you have <b id="durTxt">${curDur()} seconds</b> to find the rectangle you think has the <b>largest area</b> and submit it. <b>The app won't tell you the area.</b> Count squares, calculate, or estimate!</p></div>
     <div class="split">
-      <div class="card"><div class="gwrap">${gardenMarkup()}<div class="overlay" id="ov"></div></div><p class="hint">Each small square is 1 m². Count the squares inside and that's the area.</p></div>
+      <div class="card"><div class="gwrap">${gardenMarkup()}<div class="overlay" id="ov"></div></div><p class="hint">Each small square is 1 m². The area is the number of squares inside.</p></div>
       <div class="card panel">
         <div class="timerRow">
           <div class="ring" id="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="ringBg"/><circle cx="50" cy="50" r="44" class="ringFg" id="ringFg"/></svg><span id="tNum"></span></div>
-          <div class="areaBox"><small>Area</small><div id="aEq"></div></div>
+          <div class="areaBox"><small>Your rectangle</small><div id="aEq"></div><div class="estRow" id="estRow"><label for="est">What's its area? (optional)</label><input id="est" inputmode="decimal" autocomplete="off" placeholder="?"> m²</div></div>
         </div>
         <div class="steppers">${stepper('L','Length')}<div class="stepper"><label>Width</label><div class="row"><output id="outW2" class="ro"></output></div></div></div>
         <div class="btnRow"><button class="btn primary big" id="startBtn"></button><button class="btn orange big" id="submitBtn">Submit this rectangle</button></div>
@@ -568,7 +576,7 @@ function buildP2(){
   if(LIVE){ lastK=null; liveLoop=setInterval(()=>liveTick(false),100); liveTick(true); }
 }
 function setL2(L){const s=state.p2;s.L=L;if(running&&!s.measured.includes(L))s.measured.push(L);updP2();}
-function randomStart(){const s=state.p2;const opts=[1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24];s.L=opts[Math.floor(Math.random()*opts.length)];if(!s.measured.includes(s.L))s.measured.push(s.L);}
+function randomStart(){const e=$('#est');if(e)e.value='';const s=state.p2;const opts=[1,2,3,4,5,6,7,8,17,18,19,20,21,22,23,24];s.L=opts[Math.floor(Math.random()*opts.length)];if(!s.measured.includes(s.L))s.measured.push(s.L);}
 function startChallenge(){
   if(LIVE) return;
   const s=state.p2; randomStart();
@@ -596,26 +604,29 @@ function submit(auto){
   const s=state.p2; if(!running) return;
   const round=LIVE?runRound:null;
   if(timer){clearInterval(timer);timer=null;} running=false; runRound=null;
-  s.attempts.push({L:s.L,W:HALF-s.L,A:area(s.L),auto:!!auto,round});
+  const ev=$('#est')?num($('#est').value):NaN;
+  s.attempts.push({L:s.L,W:HALF-s.L,A:area(s.L),est:isFinite(ev)?ev:null,auto:!!auto,round});
   unlock(3); persist(); lastK=null; updP2(); renderResults(true);
   if(LIVE) pushMe();
 }
 function updP2(){
   const s=state.p2, W=HALF-s.L, svg=$('#stage .garden'); if(!svg) return;
-  drawGarden(svg,s.L,W,{showArea:running});
+  drawGarden(svg,s.L,W,{showArea:false});
   svg.querySelector('.fence').setAttribute('class','fence ok');
   $('#outL').textContent=fmt(s.L)+' m'; $('#outW2').textContent=fmt(W)+' m';
   $$('#stage .sbtn').forEach(b=>b.disabled=!running);
   const last=s.attempts[s.attempts.length-1];
-  $('#aEq').innerHTML=running?`${fmt(s.L)} × ${fmt(W)} = <span class="big">${fmt(s.L*W)}</span> m²`
-    :(last?`${fmt(last.L)} × ${fmt(last.W)} = <span class="big">${fmt(last.A)}</span> m²`:`<span class="big">?</span> m²`);
+  const lr=last&&isRevealed(last);
+  $('#aEq').innerHTML=running?`<span class="big">${fmt(s.L)} × ${fmt(W)}</span>`
+    :(last?`${fmt(last.L)} × ${fmt(last.W)} = <span class="big">${lr?fmt(last.A):'?'}</span> m²`:`<span class="big">?</span>`);
+  $('#estRow').style.display=running?'':'none';
   const ov=$('#ov'); ov.className='overlay'+(running?' hide':'');
   const sb=$('#startBtn');
   if(LIVE){
     const k=p2Status(), r=CLS.p2;
     sb.style.display='none';
     ov.innerHTML = k==='ready'?`<div>Get ready…<div class="cd" id="cd">${Math.ceil((r.startsAt-DB.now())/1000)}</div><small>Round ${r.round}</small></div>`
-      : k==='done'?`<div>Submitted: ${last?fmt(last.A):'?'} m²<br><small>Waiting for Mr. Crouch…</small></div>`
+      : k==='done'?(lr?`<div>Your garden: ${fmt(last.A)} m²<br><small>Check Mr. Crouch's screen to see who was closest!</small></div>`:`<div>Submitted: ${last?fmt(last.L)+' × '+fmt(last.W):'?'}<br><small>Mr. Crouch will reveal who was closest!</small></div>`)
       : k==='over'?`<div>That round is over.<br><small>Get ready for the next one!</small></div>`
       : `<div>⏳ Waiting for Mr. Crouch to start the challenge<br><small>Be ready: you'll have ${curDur()} seconds.</small></div>`;
     if(k==='run') ov.innerHTML='';
@@ -635,20 +646,23 @@ function updTimer(){
   $('#tNum').textContent=Math.ceil(running?timeLeft:d);
   $('#ring').classList.toggle('low',running&&timeLeft<=10);
 }
-function bestAttempt(){const a=state.p2.attempts;return a.length?a.reduce((x,y)=>y.A>x.A?y:x):null;}
+function isRevealed(a){ if(!LIVE||!a||a.round==null) return true; const r=CLS.p2; if(!r) return true; return a.round<r.round||(a.round===r.round&&!!r.revealed); }
+function bestAttempt(){const a=state.p2.attempts.filter(isRevealed);return a.length?a.reduce((x,y)=>y.A>x.A?y:x):null;}
 function renderResults(justNow){
   const s=state.p2;
   if(!s.attempts.length){$('#resWrap').innerHTML='';return;}
-  const last=s.attempts[s.attempts.length-1], best=bestAttempt();
+  const last=s.attempts[s.attempts.length-1], best=bestAttempt(), lr=isRevealed(last);
   const meas=[...new Set(s.measured)].sort((a,b)=>a-b);
+  const top=LIVE&&lr?classGuesses()[0]:null;
   $('#resWrap').innerHTML=`
     <div class="result ${justNow?'pop':''}">
-      <div><small>${last.auto?"Time's up! Submitted":'You submitted'}</small><b>${fmt(last.L)} × ${fmt(last.W)} = ${fmt(last.A)} m²</b></div>
-      <div><small>Your best (${s.attempts.length} ${s.attempts.length===1?'try':'tries'})</small><b>${fmt(best.L)} × ${fmt(best.W)} = ${fmt(best.A)} m²</b></div>
+      <div><small>${last.auto?"Time's up! Submitted":'You submitted'}</small><b>${fmt(last.L)} × ${fmt(last.W)}${lr?` = ${fmt(last.A)} m²`:''}</b>${last.est!=null?`<small style="margin-top:4px">Your area: ${fmt(last.est)} m²${lr?(last.est===last.A?' ✓':' ✗'):''}</small>`:''}</div>
+      ${lr?(top?`<div><small>Biggest in class</small><b>${fmt(top.L)} × ${fmt(top.W)} = ${fmt(top.A)} m²</b></div>`:(best?`<div><small>Your best (${s.attempts.length} ${s.attempts.length===1?'try':'tries'})</small><b>${fmt(best.L)} × ${fmt(best.W)} = ${fmt(best.A)} m²</b></div>`:''))
+        :`<div><small>Area</small><b>Hidden until Mr. Crouch reveals</b></div>`}
     </div>
-    <details class="meas"><summary>Rectangles you measured (${meas.length})</summary>
+    ${lr?`<details class="meas"><summary>Rectangles you tried (${meas.length})</summary>
       <div class="scroll"><table class="tbl"><thead><tr><th>Length (m)</th><th>Width (m)</th><th>Area (m²)</th></tr></thead><tbody>${
-        meas.map(L=>`<tr class="${L===best.L?'best':''}"><td>${fmt(L)}</td><td>${fmt(HALF-L)}</td><td>${fmt(area(L))}</td></tr>`).join('')}</tbody></table></div></details>
+        meas.map(L=>`<tr class="${best&&L===best.L?'best':''}"><td>${fmt(L)}</td><td>${fmt(HALF-L)}</td><td>${fmt(area(L))}</td></tr>`).join('')}</tbody></table></div></details>`:''}
     <div class="think"><h3>🤔 Think about it</h3><ul>
       <li>What do you notice about the length and width of the rectangles with the <b>greatest</b> area?</li>
       <li>What would happen if the length and width were <b>equal</b>?</li>
@@ -721,12 +735,64 @@ const PRED=[
   {id:'hill',label:'Goes up, then comes back down',d:'M8 55 Q 40 -27 72 55'},
   {id:'lineDown',label:'A straight line going down',d:'M10 8 L72 52'}
 ];
+function classGuesses(){
+  const out=[];
+  const add=(w,me)=>{
+    const at=(w&&w.p2&&w.p2.attempts)||[], byRound={};
+    at.forEach((a,i)=>{ if(a&&a.L!=null) byRound[a.round==null?'i'+i:'r'+a.round]=a; });
+    const seen=new Set();
+    Object.values(byRound).forEach(a=>{ if(seen.has(a.L)) return; seen.add(a.L); out.push({L:a.L,W:HALF-a.L,A:area(a.L),me}); });
+  };
+  if(LIVE){
+    Object.entries(classStudents||{}).forEach(([sid,st])=>{ if(sid===LIVE.sid) return; if(st&&st.work&&!st.demo) add(st.work,false); });
+    add(state,true);
+  } else add(state,true);
+  return out.sort((a,b)=>b.A-a.A||a.L-b.L);
+}
+function guessOverlay(list){
+  let g='';
+  for(let i=0;i<=25;i+=5) g+=`<line x1="${i}" y1="0" x2="${i}" y2="25" class="gmaj"/><line x1="0" y1="${i}" x2="25" y2="${i}" class="gmaj"/><text x="${i}" y="-0.7" class="gnum" text-anchor="middle">${i}</text><text x="-0.6" y="${i+0.28}" class="gnum" text-anchor="end">${i}</text>`;
+  const max=list.length?list[0].A:0;
+  const order=[...list].sort((a,b)=>(a.me-b.me)||((a.A===max)-(b.A===max)));
+  return `<svg class="garden" viewBox="-2.4 -2.4 29.8 29.8" role="img" aria-label="Every rectangle the class submitted, drawn from the same corner">
+    <rect x="0" y="0" width="25" height="25" class="soil"/>${g}
+    ${order.map(r=>`<rect class="gr ${r.A===max?'top':''} ${r.me?'me':''}" x="0" y="0" width="${r.L}" height="${r.W}"><title>${fmt(r.L)} × ${fmt(r.W)} = ${fmt(r.A)} m²</title></rect>`).join('')}
+  </svg>`;
+}
+let lastGuessSig='';
+function guessesHTML(){
+  const list=classGuesses(), max=list.length?list[0].A:0;
+  lastGuessSig=list.map(r=>r.L+(r.me?'m':'')).join(',');
+  return {svg:guessOverlay(list), list:list.length?`<div class="glist">${list.map(r=>`<div class="gi ${r.A===max?'top':''} ${r.me?'me':''}"><span>${fmt(r.L)} m × ${fmt(r.W)} m${r.me?' (you)':''}</span><b>${fmt(r.A)} m²${r.A===max?' 🏆':''}</b></div>`).join('')}</div>`:'<p class="small">No guesses yet.</p>', n:list.length};
+}
+function buildGuesses(){
+  const h=guessesHTML();
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Phase 3</span><h2>${LIVE?"Your class's guesses":'Your guesses'}</h2>
+    <p>Here's every rectangle ${LIVE?'your class':'you'} submitted in Phase 2, all drawn from the same corner, with the real areas.</p></div>
+    <div class="split"><div class="card"><div id="gOv">${h.svg}</div><div class="gnote"><span class="lg"><i style="background:var(--orange)"></i>Biggest area</span><span class="lg"><i style="background:var(--navy)"></i>Yours</span><span class="lg"><i style="background:var(--blue)"></i>${LIVE?'Classmates':'Other tries'}</span></div></div>
+    <div class="card panel"><h3 class="ph" id="gCount">${h.n} rectangle${h.n===1?'':'s'}, biggest area first</h3><div id="gList">${h.list}</div>
+      <div class="think"><h3>🤔 Think about it</h3><ul>
+        <li>What do the rectangles with the biggest areas have in common?</li>
+        <li>What happens to the area when the rectangle gets long and skinny?</li>
+        <li>Is there a rectangle that would beat all of these?</li></ul></div>
+      <button class="btn primary big" id="toGraph">Next: Graph it →</button></div></div></section>`;
+  $('#toGraph').onclick=()=>{state.p3.seenGuesses=true;persist();buildP3();window.scrollTo({top:0,behavior:'smooth'});};
+}
+function refreshGuesses(){
+  if(!$('#gOv')) return;
+  const list=classGuesses(), sig=list.map(r=>r.L+(r.me?'m':'')).join(',');
+  if(sig===lastGuessSig) return;
+  const h=guessesHTML(); $('#gOv').innerHTML=h.svg; $('#gList').innerHTML=h.list; $('#gCount').textContent=`${h.n} rectangle${h.n===1?'':'s'}, biggest area first`;
+}
 function buildP3(){
+  if(!state.p3.seenGuesses) return buildGuesses();
   $('#stage').innerHTML=`<section>
     <div class="intro"><span class="tag">Phase 3</span><h2>Graph it: length vs. area</h2>
-    <p>Let's turn each rectangle into a point: <b>length</b> on the x-axis and <b>area</b> on the y-axis.</p></div>
+    <p>Let's turn each rectangle into a point: <b>length</b> on the x-axis and <b>area</b> on the y-axis. <button class="linkbtn" id="backG">← Back to the guesses</button></p></div>
     <div class="split wideL"><div class="card">${graphMarkup()}<div id="gNote" class="gnote"></div></div>
     <div class="card panel" id="p3panel"></div></div></section>`;
+  $('#backG').onclick=()=>{state.p3.seenGuesses=false;persist();buildP3();};
   updP3(null);
 }
 let lastClassCount=-1;
