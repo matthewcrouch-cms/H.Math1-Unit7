@@ -68,6 +68,14 @@ h2{margin:0 0 10px;color:var(--navy);font-size:1.1rem}
 .chip{background:#FFF1E6;border-radius:8px;padding:3px 9px;font-size:.88rem}
 .chip.ok{background:#EAF8F0;color:var(--good);font-weight:700}
 .stack{display:flex;flex-direction:column;gap:14px}
+#pv{display:none}#pv.on{display:block}
+.pvbar{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pvbar .lbl{font-weight:700;color:var(--navy);margin-right:6px}
+.pvbar .sbtn{font:inherit;font-weight:600;font-size:.85rem;border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:6px 12px;cursor:pointer}
+.pvbar .sbtn.cur{background:var(--blue);border-color:var(--blue);color:#fff}
+.pvbar .frz{margin-left:auto;font-size:.85rem;font-weight:700;border-radius:99px;padding:5px 12px;background:#EEF5FB;color:var(--navy)}
+.pvbar .frz.on{background:var(--orange);color:#fff}
+.pvframe{display:block;width:100%;border:0;border-top:1px solid var(--line);background:#fff}
 </style>
 </head>
 <body>
@@ -79,6 +87,7 @@ h2{margin:0 0 10px;color:var(--navy);font-size:1.1rem}
   <div class="codebar" id="codebar"></div>
 </header>
 <main id="app"></main>
+<div id="pv"><div class="pvbar" id="pvbar"></div><iframe class="pvframe" id="pvf" title="Student view"></iframe></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -134,10 +143,12 @@ const LS={get:k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){retur
 const pretty=t=>esc(String(t||'').trim().replace(/^[a-zA-Z](\([a-zA-Z]\))?\s*=\s*/,'')).replace(/\*/g,' · ').replace(/\^2/g,'²').replace(/-/g,' − ').replace(/\+/g,' + ').replace(/\s+/g,' ').replace(/\(\s/g,'(').replace(/\s\)/g,')').trim();
 const studentURL=()=>new URL('./',location.href).href;
 
+let pvOn=false;
 let CODE=null, ST={stage:1,freeze:false}, STU={}, unsubs=[], tab=1, userTab=false, hide=!!LS.get('fallingSky:hide');
 const base=()=>`sessions/${CODE}`;
 
 function landing(msg){
+  setPv(false); const pf=document.getElementById('pvf'); if(pf) pf.removeAttribute('src');
   unsubs.forEach(u=>u()); unsubs=[]; CODE=null; $('#codebar').innerHTML=''; $('#hb').innerHTML=`<a class="hbtn" href="./">Student view</a>`;
   const saved=LS.get('fallingSky:teacher');
   $('#app').innerHTML=`<div class="landing card"><h2>Start a class session</h2>
@@ -171,14 +182,32 @@ function nameOf(s){ if(s.demo) return esc(s.name)+' <span class="tag">you</span>
 const online=s=>s.seen&&DB.now()-s.seen<75000;
 
 function renderAll(){ renderHeader(); renderBody(); }
+// In-dashboard student preview. It joins as "Mr. Crouch" (a demo student: not counted, and never frozen).
+function sizePv(){ const f=$('#pvf'); if(!pvOn||!f) return; f.style.height=Math.max(400,window.innerHeight-f.getBoundingClientRect().top-4)+'px'; }
+window.addEventListener('resize',sizePv);
+function setPv(on){
+  pvOn=!!on; const pv=$('#pv'), app=$('#app'); if(!pv) return;
+  pv.classList.toggle('on',pvOn); app.style.display=pvOn?'none':'';
+  if(pvOn){ const f=$('#pvf'); if(!f.getAttribute('src')) f.src=`${studentURL()}?code=${CODE}&name=${encodeURIComponent('Mr. Crouch')}&demo=1`; }
+  if(CODE){ renderHeader(); } setTimeout(sizePv,0); window.scrollTo({top:0});
+}
+function renderPvBar(){
+  const b=$('#pvbar'); if(!b||!CODE) return;
+  const cur=ST.stage;
+  b.innerHTML=`<span class="lbl">👁 Student view</span>${STG.map(p=>`<button class="sbtn ${p.n===cur?'cur':''}" data-pvmove="${p.n}" title="Move the class to Stage ${p.n}">Stage ${p.n}${p.n===cur?' ✓':''}</button>`).join('')}
+    <span class="frz ${ST.freeze?'on':''}">${ST.freeze?'⏸ Students are frozen (your view still works)':'▶ Students can work'}</span>`;
+  $$('[data-pvmove]',b).forEach(x=>x.onclick=()=>DB.update(`${base()}/state`,{stage:+x.dataset.pvmove}));
+}
 function renderHeader(){
   const n=real().length, on=real().filter(online).length;
-  $('#hb').innerHTML=`<a class="hbtn" target="_blank" href="${esc(studentURL())}?code=${CODE}&name=${encodeURIComponent('Mr. Crouch')}&demo=1">👁 View as student</a>
+  $('#hb').innerHTML=`<button class="hbtn ${pvOn?'on':''}" id="pvBtn">${pvOn?'📊 Back to dashboard':'👁 Student view'}</button>
     <button class="hbtn ${ST.freeze?'on':''}" id="frz">${ST.freeze?'▶ Unfreeze screens':'⏸ Freeze screens'}</button>
     <button class="hbtn ${hide?'on':''}" id="hide">${hide?'Show names':'Hide names'}</button>
     <button class="hbtn" id="end">End session</button>`;
   $('#codebar').innerHTML=`<div class="code">${CODE}</div><div class="joinurl">Students go to<br><b>${esc(studentURL().replace(/^https?:\/\//,''))}</b></div><div class="count">👥 ${n} joined · ${on} online</div>`;
   $('#frz').onclick=()=>DB.update(`${base()}/state`,{freeze:!ST.freeze});
+  $('#pvBtn').onclick=()=>setPv(!pvOn);
+  renderPvBar();
   $('#hide').onclick=()=>{hide=!hide;LS.set('fallingSky:hide',hide);renderAll();};
   $('#end').onclick=async()=>{ if(!confirm('End this session? All student work in it will be deleted.')) return; await DB.remove(base()); LS.del('fallingSky:teacher'); landing('Session ended.'); };
 }

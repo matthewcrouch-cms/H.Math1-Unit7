@@ -146,6 +146,17 @@ svg.graph{width:100%;height:auto;display:block}
 .t2 .tbl th{text-align:left;font-size:.8rem}.t2 td.past{color:var(--bad)!important;background:#FDEEEE}.t2 td.tall{background:#EEF5FB}
 .t2 .tnote{font-size:.78rem;color:var(--muted);margin-top:4px}
 footer a{color:var(--muted)}
+/* Floating Desmos window */
+#calc{position:fixed;right:20px;bottom:20px;width:min(560px,calc(100vw - 32px));height:min(600px,calc(100vh - 110px));min-width:300px;min-height:300px;background:#fff;border:2px solid var(--navy);border-radius:14px;box-shadow:0 18px 50px rgba(15,40,60,.28);z-index:60;display:none;flex-direction:column;overflow:hidden;resize:both}
+#calc.open{display:flex}
+#calc .cbar{background:var(--navy);color:#fff;padding:6px 8px 6px 14px;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;touch-action:none}
+#calc .cbar b{flex:1;font-size:.95rem}
+#calc .cbar a,#calc .cbar button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:7px;padding:3px 9px;font-size:.85rem;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit}
+#calc .cbar button.close{font-size:1.1rem;line-height:1;padding:2px 9px}
+#calc iframe{flex:1;border:0;width:100%;display:block}
+#calc.dragging iframe{pointer-events:none}
+#calc .grip{position:absolute;right:2px;bottom:0;font-size:12px;color:#8FA6B8;pointer-events:none}
+@media (max-width:560px){#calc{left:8px!important;right:8px!important;top:auto!important;bottom:8px!important;width:auto!important;height:62vh!important;resize:none}}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -153,12 +164,20 @@ footer a{color:var(--muted)}
 <header>
   <div class="hwrap">
     <div class="brand"><div class="logo">🪨</div><div><h1>Lesson 2: Falling from the Sky</h1><p>How far does a falling rock travel each second?</p></div></div>
-    <div class="hbtns"><button class="desmos" id="desmosBtn" title="Open the NC Desmos graphing calculator in a new window">🧮 Desmos calculator</button><span class="hbtns" id="hbtns"></span></div>
+    <div class="hbtns"><button class="desmos" id="desmosBtn" title="Show or hide the NC Desmos graphing calculator">🧮 Desmos calculator</button><span class="hbtns" id="hbtns"></span></div>
   </div>
   <nav id="steps"></nav>
 </header>
 <main id="stage"></main>
 <footer>Honors Math 1 · Unit 7 Lesson 2 · Comparing Quadratic and Exponential Functions · <a href="teacher.html">Teacher dashboard</a></footer>
+<div id="calc" role="dialog" aria-label="Desmos graphing calculator">
+  <div class="cbar" id="calcbar">
+    <b>🧮 Desmos · NC test version</b>
+    <a href="https://www.desmos.com/testing/northcarolina/graphing" target="_blank" rel="noopener" title="Open in a new tab">↗ New tab</a>
+    <button class="close" id="calcclose" title="Hide (your graph stays)">×</button>
+  </div>
+  <span class="grip">◢</span>
+</div>
 <div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Mr. Crouch paused the screens.</small></div></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -240,7 +259,7 @@ function pushMe(){ if(!LIVE) return; DB.update(`${base()}/students/${LIVE.sid}`,
 function cleanup(){ unsubs.forEach(u=>u()); unsubs=[]; if(heartbeat) clearInterval(heartbeat); heartbeat=null; stopSim(); }
 function renderHeader(){
   $('#hbtns').innerHTML = LIVE
-    ? `<span class="who">👤 <b>${esc(LIVE.name)}</b> · Class ${esc(LIVE.code)}</span><button class="reset" id="leave">Leave</button>`
+    ? `<span class="who">👤 <b>${esc(LIVE.name)}</b> · Class ${esc(LIVE.code)}</span>${LIVE.demo?'':'<button class="reset" id="leave">Leave</button>'}`
     : `<a class="reset" href="../">← All Unit 7 activities</a>${$('#steps').innerHTML?'<button class="reset" id="reset">↺ Start over</button>':''}`;
   const lv=$('#leave'); if(lv) lv.onclick=()=>{ if(!confirm('Leave this class session? Your work is saved and you can rejoin with the same code and name.')) return; cleanup(); LS.del('fallingSky:live'); LIVE=null; showJoin(); };
   const rs=$('#reset'); if(rs) rs.onclick=()=>{ if(!confirm('Start over? This clears your answers on this device.')) return; stopSim(); state=defaults(); if(teacherAll) state.unlocked=4; persist(); render(); };
@@ -287,7 +306,7 @@ function startLive(){
   unsubs.push(DB.on(`${base()}/state`,st=>{
     if(!st){ LS.del('fallingSky:live'); return showJoin('That class session has ended.'); }
     const prev=CLS.stage; CLS={stage:st.stage||1,freeze:!!st.freeze};
-    $('#freeze').hidden=!CLS.freeze;
+    $('#freeze').hidden=!CLS.freeze||!!(LIVE&&LIVE.demo);
     if(firstState){ firstState=false; state.stage=CLS.stage; persist(); render(); return; }
     if(CLS.stage!==prev){ go(CLS.stage); return; }
   }));
@@ -300,9 +319,21 @@ function startSolo(){
   if(state.stage>state.unlocked) state.stage=state.unlocked;
   render();
 }
-$('#desmosBtn').onclick=()=>{ const w=Math.min(560,screen.availWidth-40), h=Math.min(760,screen.availHeight-60);
-  const win=window.open('https://www.desmos.com/testing/northcarolina/graphing','ncdesmos',`popup=yes,width=${w},height=${h},left=${screen.availWidth-w-20},top=40`);
-  if(win) win.focus(); };
+// Floating Desmos window (same calculator students use on the NC state test). Closing only hides it, so the graph stays.
+const calcBox=document.getElementById('calc');
+function openCalc(){
+  if(!calcBox.querySelector('iframe')){ const f=document.createElement('iframe'); f.src='https://www.desmos.com/testing/northcarolina/graphing'; f.title='Desmos graphing calculator'; f.allow='clipboard-write'; calcBox.insertBefore(f,calcBox.querySelector('.grip')); }
+  calcBox.classList.toggle('open');
+}
+$('#desmosBtn').onclick=openCalc;
+document.getElementById('calcclose').onclick=()=>calcBox.classList.remove('open');
+(function(){ const bar=document.getElementById('calcbar'); let sx,sy,ox,oy;
+  bar.addEventListener('pointerdown',e=>{ if(e.target.closest('a,button')) return; const r=calcBox.getBoundingClientRect(); sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+    calcBox.style.left=ox+'px';calcBox.style.top=oy+'px';calcBox.style.right='auto';calcBox.style.bottom='auto';calcBox.classList.add('dragging');bar.setPointerCapture(e.pointerId); });
+  bar.addEventListener('pointermove',e=>{ if(!calcBox.classList.contains('dragging')) return;
+    calcBox.style.left=Math.min(Math.max(0,ox+e.clientX-sx),window.innerWidth-80)+'px'; calcBox.style.top=Math.min(Math.max(0,oy+e.clientY-sy),window.innerHeight-40)+'px'; });
+  const stop=()=>calcBox.classList.remove('dragging'); bar.addEventListener('pointerup',stop); bar.addEventListener('pointercancel',stop);
+})();
 
 /* ---------- navigation ---------- */
 const STAGES=[{n:1,t:'Watch it fall',s:'500-foot building'},{n:2,t:'Find the rule',s:'Predict & write d(t)'},{n:3,t:'Quadratic or exponential?',s:'Look at the change'},{n:4,t:'Two ways to measure',s:'Fallen vs. height'}];
