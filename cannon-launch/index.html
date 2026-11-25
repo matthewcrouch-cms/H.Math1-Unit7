@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3: Cannon Launch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#4B9CD3; --blue-d:#2F7AB0; --navy:#13294B; --orange:#F56600; --orange-l:#FFE3CF;
+  --bg:#F4F8FC; --card:#fff; --ink:#1B2433; --muted:#5B6678; --line:#DCE5EF; --good:#1E9E5A; --bad:#D64545;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff}
+.hwrap{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--orange);display:grid;place-items:center;font-size:24px}
+.brand h1{margin:0;font-size:1.35rem}.brand p{margin:0;font-size:.85rem;color:#BFD8EE}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.reset{background:transparent;border:1px solid #4A6488;color:#DCE8F5;border-radius:10px;padding:8px 12px;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:none}
+.reset:hover{background:#1F3A63}
+nav#steps{max-width:1180px;margin:0 auto;padding:0 20px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.step{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:0;background:#1F3A63;color:#fff;font:inherit;text-align:left;cursor:pointer}
+.step .num{width:30px;height:30px;border-radius:50%;background:#2E4E7D;display:grid;place-items:center;font-weight:700;flex:none;font-size:.9rem}
+.step b{font-size:.9rem;display:block}.step small{display:block;color:#A9C3DD;font-size:.72rem}
+.step.cur{background:var(--blue)} .step.cur .num{background:#fff;color:var(--blue-d)} .step.cur small{color:#EAF4FC}
+.step.done .num{background:var(--good)}
+.step.locked{opacity:.5;cursor:not-allowed}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:0 16px 24px}
+.intro{margin-bottom:16px}
+.tag{display:inline-block;background:var(--orange-l);color:#B44A00;font-weight:700;font-size:.75rem;padding:4px 10px;border-radius:99px;letter-spacing:.04em;text-transform:uppercase}
+.intro h2{margin:8px 0 6px;font-size:1.6rem;color:var(--navy)}
+.intro p{margin:0;max-width:860px;line-height:1.55;color:#33405A}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.split.nar{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+@media(max-width:860px){.split,.split.nar{grid-template-columns:1fr} nav#steps{grid-template-columns:repeat(2,1fr)}}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(19,41,75,.06),0 6px 24px rgba(19,41,75,.06);border:1px solid var(--line)}
+.sticky{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media(max-width:860px){.sticky{position:static}}
+.panel{display:flex;flex-direction:column;gap:14px}
+.panel p{margin:0;line-height:1.5;font-size:.95rem}
+.ph{margin:0;color:var(--navy);font-size:1.1rem}
+.small{font-size:.86rem;color:var(--muted)}
+
+/* scene */
+.scene{width:100%;height:min(600px,70vh);display:block}
+.sky{fill:url(#skyg)}
+.bld{fill:#5B6B82}.bldTop{fill:#46556B}.win{fill:#BFD8EE;opacity:.75}
+.ground{fill:#7FB069}.groundLine{stroke:#4E7A3E;stroke-width:2}
+.rock{fill:#6B5B4B;stroke:#3E342A;stroke-width:2}
+.ghost{fill:#6B5B4B;opacity:.35}
+.snapLab{fill:var(--navy);font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.ruler{stroke:#33405A;stroke-width:1.5}.rtk{fill:#33405A}
+.brk{fill:none;stroke-width:3}
+.brk.f{stroke:var(--orange)}.brk.h{stroke:var(--blue-d)}
+.brkLab{font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.thud{fill:#C9A877;opacity:.8}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.readout{font-weight:700;color:var(--navy);font-size:1.05rem;margin-left:auto}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
+
+.btn{font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);padding:10px 16px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--blue)}
+.btn.big{padding:14px 18px;font-size:1rem;width:100%}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover:not(:disabled){background:var(--blue-d)}
+.btn.orange{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.choices{display:flex;gap:8px;flex-wrap:wrap}
+.choice{flex:1;min-width:140px;font:inherit;font-weight:600;font-size:.92rem;border:2px solid var(--line);background:#fff;color:var(--navy);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:center}
+.choice:hover:not(:disabled){border-color:var(--blue)}
+.choice.ok{border-color:var(--good);background:#EAF8F0}.choice.no{border-color:var(--bad);background:#FDEEEE}
+.choice:disabled{cursor:default}
+
+.tbl{width:100%;border-collapse:collapse;font-size:.95rem}
+.tbl th{background:#EEF5FB;color:var(--navy);font-weight:600;padding:7px 8px;text-align:center;border:1px solid var(--line)}
+.tbl td{padding:6px 8px;text-align:center;border:1px solid var(--line)}
+.tbl td.hl{color:var(--orange);font-weight:700}
+.tbl td.bl{color:var(--blue-d);font-weight:700}
+.tbl tr.new td{animation:flash 1s}
+@keyframes flash{from{background:#FFF1E6}to{background:transparent}}
+.tbl input{width:100%;max-width:90px;font:inherit;padding:5px;border:2px solid var(--line);border-radius:8px;text-align:center}
+.tbl .dim{color:#B5BFCC}
+
+.qstep{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff}
+.qstep.fresh{animation:pop .35s}
+.qstep.doneStep{background:#F7FBF8;border-color:#CDE9D7}
+.qstep h4{margin:0 0 6px;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;justify-content:space-between}
+.qstep h4 .ck{color:var(--good)}
+.qstep p{margin:4px 0}
+@keyframes pop{0%{transform:scale(.95);opacity:0}100%{transform:none;opacity:1}}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.num{width:100px;font:inherit;font-size:1.05rem;padding:7px 9px;border:2px solid var(--line);border-radius:10px;text-align:center}
+input.ok{border-color:var(--good)!important;background:#EAF8F0} input.no{border-color:var(--bad)!important;background:#FDEEEE}
+.fb{font-size:.88rem;font-weight:600;line-height:1.45;margin-top:6px}.fb.ok{color:var(--good)}.fb.no{color:var(--bad)}.fb.tip{color:#7A3A0B}
+.exrow{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+.exrow .lhs{font-family:"Cambria Math",Cambria,serif;font-size:1.3rem;font-weight:700;color:var(--navy)}
+.ex{flex:1;min-width:150px;font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.2rem;padding:8px 10px;border:2px solid var(--line);border-radius:10px}
+.ex:focus,.num:focus{outline:none;border-color:var(--blue)}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+.key{font:inherit;font-family:"Cambria Math",Cambria,serif;font-size:1.05rem;min-width:40px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:#F8FBFE;cursor:pointer;color:var(--navy)}
+.preview{font-size:.85rem;color:var(--muted);min-height:1.2em}
+.reveal{background:#FFF4EC;border-left:4px solid var(--orange);padding:10px 12px;border-radius:8px;font-size:.93rem;line-height:1.5}
+.fact{background:#EEF5FB;border-left:4px solid var(--blue);padding:10px 12px;border-radius:8px;font-size:.9rem;line-height:1.5}
+.eq{font-family:"Cambria Math",Cambria,"Times New Roman",serif}
+.celebrate{background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;border-radius:14px;padding:16px;animation:pop .4s;line-height:1.5}
+.celebrate b{color:#FFD2B0}
+.waitbox{background:#EEF5FB;border:1px dashed #A9CBE8;border-radius:12px;padding:12px;text-align:center;color:var(--navy);font-weight:600;font-size:.92rem}
+
+/* graph */
+svg.graph{width:100%;height:auto;display:block}
+.gl{stroke:#EDF1F6;stroke-width:1}.axis{stroke:#5B6678;stroke-width:1.5}
+.tk{font-size:12px;fill:var(--muted)}.axt{font-size:13px;font-weight:600;fill:var(--navy)}
+.cv{fill:none;stroke-width:3.5;stroke-linecap:round}
+.cv.o{stroke:var(--orange)}.cv.b{stroke:var(--blue-d)}.cv.g{stroke:#8E5BC7}.cv.r{stroke:var(--bad);stroke-dasharray:8 6}
+.pt{stroke:#fff;stroke-width:2}.pt.o{fill:var(--orange)}.pt.b{fill:var(--blue-d)}.pt.g{fill:#8E5BC7}.pt.x{fill:var(--bad)}
+.refl{stroke:#7FB069;stroke-width:2;stroke-dasharray:6 5}.reft{font-size:12px;fill:#4E7A3E;font-weight:700}
+.glab{font-size:13px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.gnote{font-size:.85rem;color:var(--muted);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.lg{display:inline-flex;align-items:center;gap:6px}.lg i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.slider{width:100%;accent-color:var(--orange)}
+.race{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.race>div{border-radius:12px;padding:10px 12px;font-size:.9rem}
+.race .q{background:#FFF1E6}.race .e{background:#F3ECFB}
+.race b{display:block;font-size:1.3rem;color:var(--navy)}
+.lead{font-size:.75rem;font-weight:700;color:var(--good);text-transform:uppercase;letter-spacing:.04em}
+.who{background:#1F3A63;border-radius:10px;padding:7px 12px;font-size:.85rem;color:#DCE8F5}.who b{color:#fff}
+.join{max-width:460px;margin:24px auto;display:flex;flex-direction:column;gap:14px}
+.join h2{margin:0;color:var(--navy);font-size:1.5rem}
+.join label{font-weight:600;font-size:.9rem;color:var(--navy);display:block;margin-bottom:6px}
+.txt{width:100%;font:inherit;font-size:1.1rem;padding:12px 14px;border:2px solid var(--line);border-radius:12px}
+.txt:focus{outline:none;border-color:var(--blue)}
+.code-in{text-transform:uppercase;letter-spacing:.3em;font-weight:800;font-size:1.6rem;text-align:center}
+.err{color:var(--bad);font-weight:600;font-size:.9rem;min-height:1.2em;margin:0}
+.linkbtn{background:none;border:0;color:var(--blue-d);text-decoration:underline;font:inherit;cursor:pointer;padding:0}
+.muted{color:var(--muted);font-size:.9rem;text-align:center;margin:0}
+.banner{background:#FFF4EC;border:1px solid #FFD2B0;border-radius:12px;padding:10px 12px;font-size:.88rem;color:#7A3A0B}
+.freeze{position:fixed;inset:0;background:rgba(19,41,75,.94);color:#fff;display:grid;place-items:center;text-align:center;z-index:50;padding:20px}
+.freeze div{font-size:2.2rem;font-weight:800}.freeze small{display:block;font-size:1rem;font-weight:400;color:#BFD8EE;margin-top:8px}
+.desmos{background:#fff;color:var(--navy);border:0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem;cursor:pointer}
+.desmos:hover{background:#EAF3FB}
+.t2{margin-top:10px;overflow-x:auto}.t2 .tbl{font-size:.9rem}.t2 .tbl td,.t2 .tbl th{padding:5px 6px;white-space:nowrap}
+.t2 .tbl th{text-align:left;font-size:.8rem}.t2 td.past{color:var(--bad)!important;background:#FDEEEE}.t2 td.tall{background:#EEF5FB}
+.t2 .tnote{font-size:.78rem;color:var(--muted);margin-top:4px}
+footer a{color:var(--muted)}
+/* cannon */
+.viz{display:grid;grid-template-columns:minmax(96px,22%) 1fr;gap:10px;align-items:center}
+.cscene{width:100%;height:min(300px,46vh);display:block}
+.ball{fill:var(--orange);stroke:#8A3A00;stroke-width:.4%}
+.gball{fill:var(--blue);opacity:.55}
+.htbl th{text-align:left;font-size:.8rem;white-space:nowrap}.htbl td{white-space:nowrap}
+.tbl td.pu{color:#8E5BC7;font-weight:700}
+.mrow{display:flex;align-items:center;gap:10px;margin:6px 0;flex-wrap:wrap}
+.mterm{min-width:70px;font-size:1.25rem;font-weight:700;color:var(--navy)}
+.mrow select{flex:1;min-width:200px;font:inherit;padding:8px;border:2px solid var(--line);border-radius:10px}
+.chipsel{display:flex;gap:14px;flex-wrap:wrap;font-size:.88rem;margin-top:4px}.chipsel label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.chipsel input{accent-color:var(--blue);width:17px;height:17px}
+.cardtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ctab{font:inherit;font-weight:600;border:2px solid var(--line);background:#fff;color:var(--navy);border-radius:12px;padding:9px 14px;cursor:pointer}
+.ctab.on{border-color:var(--blue);background:#EEF6FD}.ctab .ck{color:var(--good)}
+.fhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap}
+.feq{font-size:1.25rem;font-weight:700;color:var(--navy);background:#FFF4EC;border-radius:10px;padding:4px 12px;white-space:nowrap}
+/* Floating Desmos window */
+#calc{position:fixed;right:20px;bottom:20px;width:min(560px,calc(100vw - 32px));height:min(600px,calc(100vh - 110px));min-width:300px;min-height:300px;background:#fff;border:2px solid var(--navy);border-radius:14px;box-shadow:0 18px 50px rgba(15,40,60,.28);z-index:60;display:none;flex-direction:column;overflow:hidden;resize:both}
+#calc.open{display:flex}
+#calc .cbar{background:var(--navy);color:#fff;padding:6px 8px 6px 14px;display:flex;align-items:center;gap:6px;cursor:move;user-select:none;touch-action:none}
+#calc .cbar b{flex:1;font-size:.95rem}
+#calc .cbar a,#calc .cbar button{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:7px;padding:3px 9px;font-size:.85rem;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit}
+#calc .cbar button.close{font-size:1.1rem;line-height:1;padding:2px 9px}
+#calc iframe{flex:1;border:0;width:100%;display:block}
+#calc.dragging iframe{pointer-events:none}
+#calc .grip{position:absolute;right:2px;bottom:0;font-size:12px;color:#8FA6B8;pointer-events:none}
+@media (max-width:560px){#calc{left:8px!important;right:8px!important;top:auto!important;bottom:8px!important;width:auto!important;height:62vh!important;resize:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand"><div class="logo">💥</div><div><h1>Lesson 3: Cannon Launch</h1><p>What goes up must come down</p></div></div>
+    <div class="hbtns"><button class="desmos" id="desmosBtn" title="Show or hide the NC Desmos graphing calculator">🧮 Desmos calculator</button><span class="hbtns" id="hbtns"></span></div>
+  </div>
+  <nav id="steps"></nav>
+</header>
+<main id="stage"></main>
+<footer>Honors Math 1 · Unit 7 Lesson 3 · Building Quadratic Functions to Describe Situations · <a href="teacher.html">Teacher dashboard</a></footer>
+<div id="calc" role="dialog" aria-label="Desmos graphing calculator">
+  <div class="cbar" id="calcbar">
+    <b>🧮 Desmos · NC test version</b>
+    <a href="https://www.desmos.com/testing/northcarolina/graphing" target="_blank" rel="noopener" title="Open in a new tab">↗ New tab</a>
+    <button class="close" id="calcclose" title="Hide (your graph stays)">×</button>
+  </div>
+  <span class="grip">◢</span>
+</div>
+<div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Your teacher paused the screens.</small></div></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDkuZVoCbhVotMLGi_iI8wGYCrRKie8ex8",
+  authDomain: "exponentproperties-7198b.firebaseapp.com",
+  databaseURL: "https://exponentproperties-7198b-default-rtdb.firebaseio.com",
+  projectId: "exponentproperties-7198b",
+  appId: "1:189445254765:web:3e6f1c783f9b6fdfa85964"
+};
+const DB = (() => {
+  const live = !!FIREBASE_CONFIG.databaseURL && typeof firebase !== 'undefined';
+  if (live) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const fdb = firebase.database();
+    let offset = 0;
+    fdb.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+    return {
+      mode: 'live', ts: () => firebase.database.ServerValue.TIMESTAMP, now: () => Date.now() + offset,
+      set: (p, v) => fdb.ref(p).set(v), update: (p, v) => fdb.ref(p).update(v), remove: p => fdb.ref(p).remove(),
+      once: p => fdb.ref(p).once('value').then(s => s.val()),
+      on: (p, cb) => { const r = fdb.ref(p); const h = r.on('value', s => cb(s.val())); return () => r.off('value', h); }
+    };
+  }
+  const KEY = 'cannon:tree', subs = [];
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const get = (t, p) => { const v = p.split('/').reduce((o, k) => (o == null ? null : o[k]), t); return v === undefined ? null : v; };
+  const clone = v => (v == null ? null : JSON.parse(JSON.stringify(v)));
+  const notify = () => { const t = read(); subs.slice().forEach(s => s.cb(clone(get(t, s.p)))); };
+  window.addEventListener('storage', e => { if (e.key === KEY) notify(); });
+  function write(p, v) {
+    const t = read(), ks = p.split('/'); let o = t;
+    ks.slice(0, -1).forEach(k => { if (typeof o[k] !== 'object' || o[k] === null) o[k] = {}; o = o[k]; });
+    if (v === null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
+    localStorage.setItem(KEY, JSON.stringify(t)); notify();
+  }
+  return {
+    mode: 'local', ts: () => Date.now(), now: () => Date.now(),
+    set: (p, v) => { write(p, clone(v)); return Promise.resolve(); },
+    update: (p, v) => { Object.keys(v).forEach(k => write(p + '/' + k, clone(v[k]))); return Promise.resolve(); },
+    remove: p => { write(p, null); return Promise.resolve(); },
+    once: p => Promise.resolve(clone(get(read(), p))),
+    on: (p, cb) => { const s = { p, cb }; subs.push(s); setTimeout(() => { if (subs.includes(s)) cb(clone(get(read(), p))); }, 0); return () => { const i = subs.indexOf(s); if (i >= 0) subs.splice(i, 1); }; }
+  };
+})();
+</script>
+
+<script>
+(function(){
+const KEY='cannonLaunch.v1', APP='cannon-launch';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(n,d=2)=>{const p=Math.pow(10,d),r=Math.round(n*p)/p;return (Object.is(r,-0)?0:r).toLocaleString('en-US',{maximumFractionDigits:d});};
+const num=v=>parseFloat(String(v).replace(/[−–—]/g,'-').replace(/[,\s]/g,''));
+const d16=t=>16*t*t;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function defaults(){return{unlocked:1,stage:1,
+  s1:{fired:false,vel:null,tbl:{},tblOk:false,dom:null,eq:'',eqOk:false,eqTries:[]},
+  s2:{fired:false,diff:{},diffOk:false,seen:null,eq:'',eqOk:false,eqTries:[],notice:''},
+  s3:{match:{},matchOk:false,layers:{},estH:'',estT:'',estDone:false,fired:false,land:'',landOk:false,dom:null,rng:null,v:800,mile:null},
+  s4:{card:0,a:{}}
+};}
+function merge(d){ const b=defaults(); if(!d||!d.s1) return b;
+  const m=(k,arrs=[],objs=[])=>{const o={...b[k],...(d[k]||{})};arrs.forEach(x=>{o[x]=(d[k]&&d[k][x])||[];});objs.forEach(x=>{o[x]=(d[k]&&d[k][x])||{};});return o;};
+  return {...b,...d,s1:m('s1',['eqTries'],['tbl']),s2:m('s2',['eqTries'],['diff']),s3:m('s3',[],['match','layers']),s4:m('s4',[],['a'])}; }
+const LS={get:k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
+const params=new URLSearchParams(location.search), teacherAll=params.has('teacher');
+let state=defaults();
+let LIVE=null, CLS={stage:1,freeze:false}, unsubs=[], firstState=true, heartbeat=null, syncT=null;
+const base=()=>`sessions/${LIVE.code}`;
+const maxStage=()=>LIVE?clamp(CLS.stage||1,1,4):state.unlocked;
+function persist(){
+  if(LIVE){ clearTimeout(syncT); syncT=setTimeout(pushMe,350); LS.set('cannon:live:work:'+LIVE.code,state); }
+  else LS.set(KEY,state);
+}
+const pushTry=(arr,t)=>{arr.push(t);if(arr.length>15)arr.shift();};
+function pushMe(){ if(!LIVE) return; DB.update(`${base()}/students/${LIVE.sid}`,{name:LIVE.name,demo:!!LIVE.demo,stage:state.stage,seen:DB.ts(),work:JSON.parse(JSON.stringify(state))}).catch(()=>{}); }
+function cleanup(){ unsubs.forEach(u=>u()); unsubs=[]; if(heartbeat) clearInterval(heartbeat); heartbeat=null; stopSim(); }
+function renderHeader(){
+  $('#hbtns').innerHTML = LIVE
+    ? `<span class="who">👤 <b>${esc(LIVE.name)}</b> · Class ${esc(LIVE.code)}</span>${LIVE.demo?'':'<button class="reset" id="leave">Leave</button>'}`
+    : `<a class="reset" href="../">← All Unit 7 activities</a>${$('#steps').innerHTML?'<button class="reset" id="reset">↺ Start over</button>':''}`;
+  const lv=$('#leave'); if(lv) lv.onclick=()=>{ if(!confirm('Leave this class session? Your work is saved and you can rejoin with the same code and name.')) return; cleanup(); LS.del('cannon:live'); LIVE=null; showJoin(); };
+  const rs=$('#reset'); if(rs) rs.onclick=()=>{ if(!confirm('Start over? This clears your answers on this device.')) return; stopSim(); state=defaults(); if(teacherAll) state.unlocked=4; persist(); render(); };
+}
+function showJoin(msg){
+  cleanup(); $('#steps').innerHTML=''; $('#freeze').hidden=true; renderHeader();
+  const saved=LS.get('cannon:live')||{};
+  const qcode=(params.get('code')||saved.code||'').toUpperCase();
+  $('#stage').innerHTML=`<div class="join card">
+    <h2>Join your class</h2>
+    ${DB.mode==='local'?'<div class="banner"><b>Practice mode:</b> the live connection isn\'t available, so this only syncs between tabs of this browser.</div>':''}
+    <div><label for="code">Class code</label><input id="code" class="txt code-in" maxlength="4" autocomplete="off" value="${esc(qcode)}" placeholder="ABCD"></div>
+    <div><label for="name">Your first name and last initial</label><input id="name" class="txt" maxlength="24" autocomplete="off" value="${esc(saved.name||params.get('name')||'')}" placeholder="e.g. Jordan M."></div>
+    <button class="btn primary big" id="joinBtn">Join class</button>
+    <p class="err" id="err">${esc(msg||'')}</p>
+    <p class="muted">No code? <button class="linkbtn" id="solo">Work on my own</button></p></div>`;
+  const go=()=>joinLive($('#code').value.trim().toUpperCase(),$('#name').value.trim(),!!params.get('demo'));
+  $('#joinBtn').onclick=go; $$('.txt').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter')go();});
+  $('#solo').onclick=startSolo; (qcode?$('#name'):$('#code')).focus();
+}
+async function joinLive(code,name,demo){
+  const err=m=>{const e=$('#err');if(e)e.textContent=m;};
+  if(!/^[A-Z]{4}$/.test(code)) return err('Enter the 4-letter class code.');
+  if(!name) return err('Enter your name.');
+  err('Joining…');
+  try{
+    const st=await DB.once(`sessions/${code}/state`);
+    if(!st) return err('No class found with that code. Check with your teacher.');
+    if((await DB.once(`sessions/${code}/app`))!==APP) return err('That code is for a different activity.');
+    const studs=await DB.once(`sessions/${code}/students`)||{};
+    const saved=LS.get('cannon:live');
+    let sid=(saved&&saved.code===code&&studs[saved.sid]&&(studs[saved.sid].name||'').toLowerCase()===name.toLowerCase())?saved.sid:null;
+    if(!sid) sid=Object.keys(studs).find(k=>(studs[k].name||'').trim().toLowerCase()===name.toLowerCase())||null;
+    let work=sid&&studs[sid]?studs[sid].work:null;
+    if(!sid) sid='s'+Math.random().toString(36).slice(2,10);
+    LIVE={code,sid,name,demo}; LS.set('cannon:live',{code,sid,name,demo});
+    state=merge(work); firstState=true;
+    await DB.update(`sessions/${code}/students/${sid}`,{name,demo:!!demo,stage:state.stage,joined:DB.ts(),seen:DB.ts(),work:JSON.parse(JSON.stringify(state))});
+    startLive();
+  }catch(e){ err('Could not connect. Ask your teacher to check the setup.'); }
+}
+function startLive(){
+  cleanup();
+  unsubs.push(DB.on(`${base()}/state`,st=>{
+    if(!st){ LS.del('cannon:live'); return showJoin('That class session has ended.'); }
+    const prev=CLS.stage; CLS={stage:st.stage||1,freeze:!!st.freeze};
+    $('#freeze').hidden=!CLS.freeze||!!(LIVE&&LIVE.demo);
+    if(firstState){ firstState=false; state.stage=CLS.stage; persist(); render(); return; }
+    if(CLS.stage!==prev){ go(CLS.stage); return; }
+  }));
+  unsubs.push(DB.on(`${base()}/kicked/${LIVE.sid}`,k=>{ if(k){ DB.remove(`${base()}/kicked/${LIVE.sid}`); LS.del('cannon:live'); LIVE=null; showJoin('You were removed from the class. Rejoin with your correct name.'); } }));
+  heartbeat=setInterval(()=>{ if(LIVE) DB.update(`${base()}/students/${LIVE.sid}`,{seen:DB.ts(),stage:state.stage}).catch(()=>{}); },30000);
+}
+function startSolo(){
+  cleanup(); LIVE=null; LS.del('cannon:live');
+  state=merge(LS.get(KEY)); if(teacherAll) state.unlocked=4;
+  if(state.stage>state.unlocked) state.stage=state.unlocked;
+  render();
+}
+// Floating Desmos window (same calculator students use on the NC state test). Closing only hides it, so the graph stays.
+const calcBox=document.getElementById('calc');
+function openCalc(){
+  if(!calcBox.querySelector('iframe')){ const f=document.createElement('iframe'); f.src='https://www.desmos.com/testing/northcarolina/graphing'; f.title='Desmos graphing calculator'; f.allow='clipboard-write'; calcBox.insertBefore(f,calcBox.querySelector('.grip')); }
+  calcBox.classList.toggle('open');
+}
+$('#desmosBtn').onclick=openCalc;
+document.getElementById('calcclose').onclick=()=>calcBox.classList.remove('open');
+(function(){ const bar=document.getElementById('calcbar'); let sx,sy,ox,oy;
+  bar.addEventListener('pointerdown',e=>{ if(e.target.closest('a,button')) return; const r=calcBox.getBoundingClientRect(); sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;
+    calcBox.style.left=ox+'px';calcBox.style.top=oy+'px';calcBox.style.right='auto';calcBox.style.bottom='auto';calcBox.classList.add('dragging');bar.setPointerCapture(e.pointerId); });
+  bar.addEventListener('pointermove',e=>{ if(!calcBox.classList.contains('dragging')) return;
+    calcBox.style.left=Math.min(Math.max(0,ox+e.clientX-sx),window.innerWidth-80)+'px'; calcBox.style.top=Math.min(Math.max(0,oy+e.clientY-sy),window.innerHeight-40)+'px'; });
+  const stop=()=>calcBox.classList.remove('dragging'); bar.addEventListener('pointerup',stop); bar.addEventListener('pointercancel',stop);
+})();
+
+/* ---------- navigation ---------- */
+const STAGES=[{n:1,t:'Sky bound',s:'No gravity'},{n:2,t:'Turn on gravity',s:'Tracking a cannonball'},{n:3,t:'Another cannonball',s:'50 + 312t − 16t²'},{n:4,t:'Domain detective',s:'Domain, vertex, zeros'}];
+function renderSteps(){
+  const mx=maxStage();
+  $('#steps').innerHTML=STAGES.map(p=>{const locked=p.n>mx,cur=p.n===state.stage,done=p.n<mx&&!cur;
+    return `<button class="step ${cur?'cur':''} ${locked?'locked':''} ${done?'done':''}" data-n="${p.n}" ${locked?'disabled':''}><span class="num">${locked?'🔒':(done?'✓':p.n)}</span><span><b>${p.t}</b><small>${p.s}</small></span></button>`;}).join('');
+  $$('#steps .step').forEach(b=>b.onclick=()=>go(+b.dataset.n));
+}
+function go(n){if(n>maxStage())return;stopSim();state.stage=n;persist();render();window.scrollTo({top:0,behavior:'smooth'});}
+function unlock(n){if(LIVE)return;state.unlocked=Math.max(state.unlocked,n);persist();renderSteps();}
+function nextBtn(n,label,id){ if(n<=maxStage()) return `<button class="btn primary big" id="${id}">${label}</button>`; return `<div class="waitbox">⏳ Nice work! Your teacher will open Stage ${n} soon.</div>`; }
+function render(){renderSteps();renderHeader();[null,buildS1,buildS2,buildS3,buildS4][state.stage]();}
+
+/* ---------- cannon scene ---------- */
+let sim=null;
+function stopSim(){if(sim){cancelAnimationFrame(sim.raf);sim=null;}}
+function CannonScene(container,{H,h0,f,ghost=null,tEnd,step=500}){
+  const s=H/100, y=v=>H-v, W=52*s;
+  let ticks=''; for(let v=0;v<=H;v+=step) ticks+=`<line class="ruler" x1="${30*s}" x2="${32.5*s}" y1="${y(v)}" y2="${y(v)}"/><text class="rtk" x="${33.5*s}" y="${y(v)+1*s}" font-size="${2.9*s}">${v.toLocaleString()}</text>`;
+  const ph=Math.max(h0,1.4*s);
+  container.innerHTML=`<svg class="cscene" viewBox="${-6*s} ${-9*s} ${W} ${H+19*s}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="A cannonball launched straight up">
+    <defs><linearGradient id="skyc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9DCF4"/><stop offset="1" stop-color="#F4F9FD"/></linearGradient></defs>
+    <rect x="${-6*s}" y="${-9*s}" width="${W}" height="${H+9*s}" fill="url(#skyc)"/>
+    <rect x="${-6*s}" y="${H}" width="${W}" height="${10*s}" class="ground"/>
+    <rect x="${4*s}" y="${H-ph}" width="${14*s}" height="${ph}" fill="#8A7E66"/>
+    <rect x="${9.4*s}" y="${H-ph-7*s}" width="${3.2*s}" height="${7*s}" rx="${.6*s}" fill="#33405A"/>
+    <circle cx="${8.8*s}" cy="${H-ph-1.4*s}" r="${1.6*s}" fill="#5B6678"/><circle cx="${13.2*s}" cy="${H-ph-1.4*s}" r="${1.6*s}" fill="#5B6678"/>
+    <line class="ruler" x1="${30*s}" x2="${30*s}" y1="0" y2="${H}"/>${ticks}
+    <text x="${30*s}" y="${-5*s}" font-size="${2.9*s}" fill="#33405A" font-weight="700" text-anchor="middle">feet</text>
+    <circle class="gball" cx="${11*s}" cy="${y(h0)}" r="${1.7*s}" ${ghost?'':'style="display:none"'}/>
+    <circle class="ball" cx="${11*s}" cy="${y(h0)}" r="${1.9*s}"/>
+    <g class="off"></g>
+    <text class="splat" x="${11*s}" y="${H+6.5*s}" font-size="${3.6*s}" text-anchor="middle"></text>
+  </svg>`;
+  const svg=container.querySelector('svg');
+  const self={tEnd,t:0};
+  self.set=t=>{
+    t=clamp(t,0,tEnd); self.t=t;
+    const v=Math.max(0,f(t)); let off='';
+    const b=svg.querySelector('.ball'); b.setAttribute('cy',y(Math.min(v,H+4*s))); b.style.display=v>H+3*s?'none':'';
+    if(v>H+3*s) off+=`<text x="${11*s}" y="${-2*s}" font-size="${3*s}" text-anchor="middle" fill="#13294B" font-weight="700">↑ ${Math.round(v).toLocaleString()} ft</text>`;
+    if(ghost){ const g=ghost(t), gb=svg.querySelector('.gball'); gb.setAttribute('cy',y(Math.min(g,H+4*s))); gb.style.display=g>H+3*s?'none':'';
+      if(g>H+3*s) off+=`<text x="${11*s}" y="${-6*s}" font-size="${2.6*s}" text-anchor="middle" fill="#2F7AB0" font-weight="700">no gravity ↑</text>`; }
+    svg.querySelector('.off').innerHTML=off;
+    svg.querySelector('.splat').textContent=(t>=tEnd-1e-9&&f(tEnd)<=1)?'💥':'';
+  };
+  self.set(0); return self;
+}
+function runSim(scene,speed,onT,onEnd){
+  stopSim(); const s={raf:0,last:performance.now()}; sim=s;
+  if(scene.t>=scene.tEnd-1e-9) scene.set(0);
+  const loop=now=>{ if(sim!==s) return; const dt=(now-s.last)/1000; s.last=now; const t=Math.min(scene.tEnd,scene.t+dt*speed); scene.set(t); onT&&onT(t);
+    if(t>=scene.tEnd){ sim=null; onEnd&&onEnd(); return; } s.raf=requestAnimationFrame(loop); };
+  s.raf=requestAnimationFrame(loop);
+}
+function simControls(id,def=2){
+  return `<div class="ctrls"><button class="btn orange" id="${id}Go">🔥 Fire!</button><button class="btn" id="${id}Reset">↺ Reset</button>
+    <select id="${id}Spd" aria-label="Speed">${[[1,'Real speed'],[2,'2× speed'],[4,'4× speed']].map(([v,l])=>`<option value="${v}" ${v===def?'selected':''}>${l}</option>`).join('')}</select>
+    <span class="readout" id="${id}Out">t = 0 s</span></div>`;
+}
+
+/* ---------- graph ---------- */
+let gid=0;
+function Graph(container,{xMin=0,xMax,yMin=0,yMax,xStep=1,yStep,xl='Time (seconds)',yl}){
+  const W=580,H=380,x0=72,x1=560,y0=328,y1=18, id='g'+(++gid);
+  const X=t=>x0+(t-xMin)/(xMax-xMin)*(x1-x0), Y=v=>y0-(v-yMin)/(yMax-yMin)*(y0-y1);
+  let ax='';
+  for(let t=Math.ceil(xMin/xStep)*xStep;t<=xMax+1e-9;t+=xStep) ax+=`<line class="gl" x1="${X(t)}" x2="${X(t)}" y1="${y1}" y2="${y0}"/><text class="tk" x="${X(t)}" y="${y0+18}" text-anchor="middle">${fmt(t)}</text>`;
+  for(let v=Math.ceil(yMin/yStep)*yStep;v<=yMax+1e-9;v+=yStep) ax+=`<line class="gl" x1="${x0}" x2="${x1}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tk" x="${x0-8}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`;
+  const zx=xMin<=0&&xMax>=0?X(0):x0, zy=yMin<=0&&yMax>=0?Y(0):y0;
+  container.innerHTML=`<svg class="graph" viewBox="0 0 ${W} ${H}"><defs><clipPath id="${id}c"><rect x="${x0}" y="${y1-4}" width="${x1-x0+4}" height="${y0-y1+8}"/></clipPath></defs>${ax}
+    <line class="axis" x1="${x0}" x2="${x1}" y1="${zy}" y2="${zy}"/><line class="axis" x1="${zx}" x2="${zx}" y1="${y0}" y2="${y1}"/>
+    <text class="axt" x="${(x0+x1)/2}" y="${H-6}" text-anchor="middle">${xl}</text><text class="axt" transform="translate(14 ${(y0+y1)/2}) rotate(-90)" text-anchor="middle">${yl}</text>
+    <g class="ref" clip-path="url(#${id}c)"></g><g class="curves" clip-path="url(#${id}c)"></g><g class="pts"></g><g class="labs"></g></svg>`;
+  const svg=container.querySelector('svg');
+  return {X,Y,xMin,xMax,yMin,yMax,x0,x1,y0,y1,layer:n=>svg.querySelector('.'+n),
+    path:(f,a=xMin,b=xMax,n=200)=>{let d='',pen=false;const span=yMax-yMin;for(let i=0;i<=n;i++){const t=a+(b-a)*i/n,v=f(t);if(!isFinite(v)||v>yMax+span||v<yMin-span){pen=false;continue;}d+=(pen?'L':'M')+X(t).toFixed(1)+' '+Y(v).toFixed(1);pen=true;}return d;}};
+}
+function hTable(rows){ // rows: [{label, cells:[html], cls}]
+  return `<table class="tbl htbl"><tbody>${rows.map(r=>`<tr><th>${r.label}</th>${r.cells.map(c=>`<td class="${r.cls||''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+/* ---------- shared form helpers ---------- */
+function parseExpr(src){
+  let s=String(src||'').toLowerCase().replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/[×·•∙]/g,'*').replace(/²/g,'^2').replace(/÷/g,'/');
+  s=s.replace(/^[a-z](\([a-z]\))?=/,'');
+  if(!s) throw new Error('empty');
+  const toks=[];let i=0;
+  while(i<s.length){const c=s[i];
+    if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;const v=parseFloat(s.slice(i,j));if(isNaN(v))throw 0;toks.push({t:'n',v});i=j;continue;}
+    if(c==='t'||c==='x'){toks.push({t:'v'});i++;continue;}
+    if('+-*/^()'.includes(c)){toks.push({t:c});i++;continue;}
+    throw new Error('char');}
+  const out=[];toks.forEach((b,k)=>{const a=toks[k-1];if(a&&(a.t==='n'||a.t==='v'||a.t===')')&&(b.t==='n'||b.t==='v'||b.t==='('))out.push({t:'*'});out.push(b);});
+  let p=0;const peek=()=>out[p],eat=t=>{if(out[p]&&out[p].t===t){p++;return true;}return false;};
+  function expr(){let f=term();while(peek()&&(peek().t==='+'||peek().t==='-')){const op=out[p++].t,g=term(),F=f;f=op==='+'?(x=>F(x)+g(x)):(x=>F(x)-g(x));}return f;}
+  function term(){let f=unary();while(peek()&&(peek().t==='*'||peek().t==='/')){const op=out[p++].t,g=unary(),F=f;f=op==='*'?(x=>F(x)*g(x)):(x=>F(x)/g(x));}return f;}
+  function unary(){if(eat('-')){const g=unary();return x=>-g(x);}if(eat('+'))return unary();return power();}
+  function power(){const b=atom();if(eat('^')){const e=unary();return x=>Math.pow(b(x),e(x));}return b;}
+  function atom(){const t=out[p++];if(!t)throw 0;if(t.t==='n')return()=>t.v;if(t.t==='v')return x=>x;if(t.t==='('){const f=expr();if(!eat(')'))throw 0;return f;}throw 0;}
+  const f=expr();if(p!==out.length)throw 0;
+  return {f,hasVar:toks.some(t=>t.t==='v')};
+}
+const tryParse=t=>{try{return parseExpr(t);}catch(e){return null;}};
+const TESTS=[0.5,1,2,3.3,5,7.5];
+const equiv=(f,g)=>TESTS.every(x=>{const a=f(x),b=g(x);return isFinite(a)&&Math.abs(a-b)<1e-6*(1+Math.abs(b));});
+const pretty=t=>esc(String(t||'').trim().replace(/^[a-zA-Z](\([a-zA-Z]\))?\s*=\s*/,'')).replace(/\*/g,' · ').replace(/\^2/g,'²').replace(/-/g,' − ').replace(/\+/g,' + ').replace(/\s+/g,' ').replace(/\(\s/g,'(').replace(/\s\)/g,')').trim();
+function exInput(id,lhs,val,ok){
+  return `<div class="exrow"><span class="lhs">${lhs} =</span><input class="ex ${ok?'ok':''}" id="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(val||'')}" ${ok?'readonly':''} placeholder="use t for time"></div>
+  ${ok?'':`<div class="keys">${['t','(',')','−','·','²'].map(k=>`<button class="key" data-for="${id}" data-k="${k}">${k}</button>`).join('')}</div><div class="preview" id="${id}Pv"></div>`}`;
+}
+function bindKeys(root){
+  $$('.key',root).forEach(b=>b.onclick=()=>{const el=$('#'+b.dataset.for),map={'−':'-','·':'*','²':'^2'},ins=map[b.dataset.k]||b.dataset.k;
+    const st=el.selectionStart??el.value.length,en=el.selectionEnd??el.value.length;el.value=el.value.slice(0,st)+ins+el.value.slice(en);el.focus();el.selectionStart=el.selectionEnd=st+ins.length;el.dispatchEvent(new Event('input'));});
+  $$('.ex',root).forEach(el=>{const pv=$('#'+el.id+'Pv');if(!pv)return;const upd=()=>{const v=el.value.trim();if(!v){pv.textContent='';return;}pv.innerHTML=tryParse(v)?`Reads as: <b>${pretty(v)}</b>`:'<span style="color:var(--bad)">Check your typing (missing parenthesis?)</span>';};el.addEventListener('input',()=>{el.classList.remove('no');upd();});upd();});
+}
+const head=(n,title,ok)=>`<h4><span>${n?`Step ${n} · `:''}${title}</span>${ok?'<span class="ck">✓ Done</span>':''}</h4>`;
+const fbSet=(id,cls,msg)=>{const e=$('#'+id);if(e){e.className='fb '+cls;e.innerHTML=msg;}};
+const mark=(el,ok)=>{el.classList.remove('ok','no');el.classList.add(ok?'ok':'no');};
+function choiceRow(name,opts,picked,correct){
+  return `<div class="choices">${opts.map(o=>`<button class="choice ${picked===o.id?(o.id===correct?'ok':'no'):''}" data-c="${name}" data-v="${o.id}" ${picked===correct?'disabled':''}>${o.label}</button>`).join('')}</div>`;
+}
+const fbChoice=(picked,correct,msgs)=>picked?`<div class="fb ${picked===correct?'ok':'no'}">${msgs[picked]||''}</div>`:'';
+function scrollLast(P){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.classList.add('fresh');last.scrollIntoView({behavior:'smooth',block:'nearest'});const inp=last.querySelector('input:not([readonly]),textarea');if(inp)setTimeout(()=>inp.focus({preventScroll:true}),300);}}
+function vizCard(id,extra=''){ return `<div class="card sticky"><div class="viz"><div class="vizS" id="${id}S"></div><div><div id="${id}G"></div><div class="gnote" id="${id}N"></div></div></div>${simControls(id)}${extra}</div>`; }
+
+/* =====================================================================
+   STAGE 1: Sky bound (no gravity)
+   ===================================================================== */
+const ng1=t=>10+406*t;
+let sc1=null,g1=null;
+function buildS1(){
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Stage 1 · Warm-up</span><h2>Sky bound</h2>
+    <p>A cannon is <b>10 feet</b> off the ground. It launches a cannonball <b>straight up</b> at <b>406 feet per second</b>. Imagine there is <b>no gravity</b>, so the cannonball keeps going up at the same speed.</p></div>
+    <div class="split">${vizCard('v1','<div class="t2" id="t1"></div>')}<div class="card panel" id="p1"></div></div></section>`;
+  sc1=CannonScene($('#v1S'),{H:2200,h0:10,f:ng1,tEnd:5});
+  g1=Graph($('#v1G'),{xMax:5,yMax:2200,yStep:500,yl:'Height (ft)'});
+  const s=state.s1;
+  const upd=t=>{$('#v1Out').textContent=`t = ${fmt(t,1)} s · ${fmt(ng1(t),0)} ft`;draw1(t);};
+  $('#v1Spd').value='1';
+  $('#v1Go').onclick=()=>runSim(sc1,+$('#v1Spd').value,upd,()=>{if(!s.fired){s.fired=true;persist();upd1(false);}});
+  $('#v1Reset').onclick=()=>{stopSim();sc1.set(0);upd(0);};
+  if(s.fired){sc1.set(5);draw1(5);} else draw1(0);
+  upd1(false);
+}
+function draw1(t){
+  const s=state.s1,g=g1; if(!g) return;
+  g.layer('curves').innerHTML=t>0?`<path class="cv b" d="${g.path(ng1,0,t)}"/>`:'';
+  let pts=''; if(s.tblOk) for(let k=0;k<=5;k++) pts+=`<circle class="pt b" cx="${g.X(k)}" cy="${g.Y(ng1(k))}" r="5.5"/>`;
+  g.layer('pts').innerHTML=pts;
+  $('#v1N').innerHTML='<span class="lg"><i style="background:var(--blue-d)"></i>No gravity</span>';
+  $('#t1').innerHTML=hTable([{label:'Time (s)',cells:[0,1,2,3,4,5].map(k=>`<b>${k}</b>`)},{label:'Height (ft)',cls:'bl',cells:[0,1,2,3,4,5].map(k=>k===0||s.tblOk?ng1(k).toLocaleString():'?')}]);
+}
+function upd1(scroll){
+  const s=state.s1,P=$('#p1');
+  let h=`<div class="qstep ${s.vel==='up'?'doneStep':''}">${head(1,'What does it mean?',s.vel==='up')}
+    <p>What does a velocity of <b>406 feet per second</b> mean?</p>
+    ${choiceRow('vel',[{id:'up',label:'It rises 406 feet every second'},{id:'high',label:'It is 406 feet high'},{id:'time',label:'It flies for 406 seconds'}],s.vel,'up')}
+    ${fbChoice(s.vel,'up',{up:'✓ Every second, it goes 406 feet higher.',high:'That\'s a speed, not a height. Feet <b>per second</b> tells how fast the height changes.',time:'Look at the units: feet per second. It\'s how many feet each second.'})}</div>`;
+  if(s.vel==='up') h+=`<div class="qstep ${s.tblOk?'doneStep':''}">${head(2,'Complete the table',s.tblOk)}
+    <p>Fire the cannon if you'd like, then find the height at each time with <b>no gravity</b>.</p>
+    <table class="tbl"><thead><tr><th>Time (s)</th><th>Height (ft)</th></tr></thead><tbody>
+    ${[0,1,2,3,4,5].map(k=>`<tr><td>${k}</td><td>${k===0?'<b>10</b>':`<input data-h1="${k}" inputmode="decimal" value="${esc(s.tblOk?ng1(k):(s.tbl[k]||''))}" ${s.tblOk?'readonly class="ok"':''}>`}</td></tr>`).join('')}
+    </tbody></table>${s.tblOk?'':'<button class="btn" id="cT1" style="margin-top:8px">Check</button>'}<div class="fb ${s.tblOk?'ok':''}" id="fbT1">${s.tblOk?'✓ Start at 10 and add 406 every second.':''}</div></div>`;
+  if(s.tblOk){ const ok=s.dom==='ge0';
+    h+=`<div class="qstep ${ok?'doneStep':''}">${head(3,'Domain with no gravity',ok)}
+    <p>If there were no gravity, what domain would make sense for time t?</p>
+    ${choiceRow('dom1',[{id:'all',label:'All real numbers'},{id:'ge0',label:'t ≥ 0'},{id:'05',label:'0 ≤ t ≤ 5'}],s.dom,'ge0')}
+    ${fbChoice(s.dom,'ge0',{ge0:'✓ Time starts at 0, and with no gravity the ball would never come down, so it keeps going forever.',all:'Negative time would be before the cannon fired. Does that make sense here?',['05']:'We only made a table up to 5 seconds, but with no gravity, would the ball stop at 5 seconds?'})}</div>`; }
+  if(s.dom==='ge0') h+=`<div class="qstep ${s.eqOk?'doneStep':''}">${head(4,'Write the equation',s.eqOk)}
+    <p>Write an equation for the height <b>d</b> of the ball <b>t</b> seconds after it was fired, if there was no gravity.</p>
+    ${exInput('e1','d',s.eqOk?s.eq:(s.eqTry||''),s.eqOk)}
+    ${s.eqOk?'':'<button class="btn" id="cE1">Check</button>'}<div class="fb ${s.eqOk?'ok':''}" id="fbE1">${s.eqOk?'✓ <b>d = 10 + 406t</b>: a <b>linear</b> function. Start at 10, rise 406 ft each second.':''}</div></div>`;
+  if(s.eqOk) h+=nextBtn(2,'Next: Turn on gravity →','to2');
+  P.innerHTML=h; bindKeys(P);
+  $$('[data-c="vel"]').forEach(b=>b.onclick=()=>{s.vel=b.dataset.v;persist();upd1(s.vel==='up');});
+  $$('[data-h1]').forEach(i=>i.oninput=()=>{s.tbl[i.dataset.h1]=i.value;i.classList.remove('no');persist();});
+  const cT=$('#cT1'); if(cT) cT.onclick=()=>{let all=true;$$('[data-h1]').forEach(i=>{const k=+i.dataset.h1,ok=num(i.value)===ng1(k);mark(i,ok);if(!ok)all=false;});
+    if(all){s.tblOk=true;persist();draw1(sc1?sc1.t:0);upd1(true);}else fbSet('fbT1','no','Start at 10 ft. Each second, add 406 ft.');};
+  $$('[data-c="dom1"]').forEach(b=>b.onclick=()=>{s.dom=b.dataset.v;persist();upd1(s.dom==='ge0');});
+  const cE=$('#cE1'); if(cE) cE.onclick=()=>{const el=$('#e1'),t=el.value.trim();s.eqTry=t;if(t)pushTry(s.eqTries,t);const pr=tryParse(t);
+    if(pr&&pr.hasVar&&equiv(pr.f,ng1)){s.eq=t;s.eqOk=true;unlock(2);persist();upd1(true);pushMe();return;} mark(el,false);persist();
+    let m='I can\'t read that. Use t for time.';
+    if(pr&&!pr.hasVar) m='Your equation needs <b>t</b> in it.';
+    else if(pr&&equiv(pr.f,t=>406*t)) m='Close! Where does the ball start? The cannon is 10 ft off the ground.';
+    else if(pr&&equiv(pr.f,t=>10*t+406)) m='Switched! 10 is the starting height, and 406 is how much it rises <b>each second</b>.';
+    else if(pr) m=`Test it: when t = 2, your equation gives ${fmt(pr.f(2))}, but the table says 822 ft.`;
+    fbSet('fbE1','no',m);};
+  const n=$('#to2'); if(n) n.onclick=()=>go(2);
+  if(scroll) scrollLast(P);
+}
+
+/* =====================================================================
+   STAGE 2: Turn on gravity (tracking a cannonball)
+   ===================================================================== */
+const wg2=t=>10+406*t-16*t*t, T2=(406+Math.sqrt(406*406+640))/32;
+let sc2=null,g2=null;
+function buildS2(){
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Stage 2</span><h2>Turn on gravity</h2>
+    <p>Same cannon, same launch: 10 feet up, 406 feet per second. But now <b>gravity</b> is pulling on the cannonball. The <b style="color:#2F7AB0">blue ball</b> shows what would happen with no gravity. The <b style="color:#B44A00">orange ball</b> is the real one.</p></div>
+    <div class="split">${vizCard('v2','<div class="t2" id="t2"></div>')}<div class="card panel" id="p2"></div></div></section>`;
+  sc2=CannonScene($('#v2S'),{H:2800,h0:10,f:wg2,ghost:ng1,tEnd:T2});
+  g2=Graph($('#v2G'),{xMax:26,xStep:2,yMax:2800,yStep:500,yl:'Height (ft)'});
+  const s=state.s2;
+  const upd=t=>{$('#v2Out').textContent=`t = ${fmt(t,1)} s · ${fmt(Math.max(0,wg2(t)),0)} ft`;draw2(t);};
+  $('#v2Spd').value='4';
+  $('#v2Go').onclick=()=>runSim(sc2,+$('#v2Spd').value,upd,()=>{$('#v2Out').textContent=`💥 Lands at about ${fmt(T2,1)} s`;if(!s.fired){s.fired=true;persist();}});
+  $('#v2Reset').onclick=()=>{stopSim();sc2.set(0);upd(0);};
+  if(s.fired){sc2.set(T2);draw2(T2);} else draw2(0);
+  upd2(false);
+}
+function draw2(t){
+  const s=state.s2,g=g2; if(!g) return;
+  g.layer('curves').innerHTML=t>0?`<path class="cv b" d="${g.path(ng1,0,t)}"/><path class="cv o" d="${g.path(wg2,0,t)}"/>`:'';
+  let pts=''; for(let k=0;k<=5;k++) pts+=`<circle class="pt b" cx="${g.X(k)}" cy="${g.Y(ng1(k))}" r="4.5"/><circle class="pt o" cx="${g.X(k)}" cy="${g.Y(wg2(k))}" r="4.5"/>`;
+  g.layer('pts').innerHTML=pts;
+  $('#v2N').innerHTML='<span class="lg"><i style="background:var(--blue-d)"></i>No gravity</span><span class="lg"><i style="background:var(--orange)"></i>With gravity</span>';
+  const K=[0,1,2,3,4,5];
+  $('#t2').innerHTML=hTable([{label:'Time (s)',cells:K.map(k=>`<b>${k}</b>`)},{label:'No gravity (ft)',cls:'bl',cells:K.map(k=>ng1(k).toLocaleString())},{label:'With gravity (ft)',cls:'hl',cells:K.map(k=>wg2(k).toLocaleString())},{label:'Difference (ft)',cls:'pu',cells:K.map(k=>k===0?'0':(s.diffOk?16*k*k:'?'))}]);
+}
+function upd2(scroll){
+  const s=state.s2,P=$('#p2');
+  let h=`<div class="qstep ${s.diffOk?'doneStep':''}">${head(1,'Compare the tables',s.diffOk)}
+    <p>How much <b>lower</b> is the real cannonball than the no-gravity cannonball at each time? Subtract: no gravity − with gravity.</p>
+    <table class="tbl"><thead><tr><th>Time (s)</th><th>No gravity − with gravity</th></tr></thead><tbody>
+    ${[1,2,3,4,5].map(k=>`<tr><td>${k}</td><td><input data-d2="${k}" inputmode="decimal" value="${esc(s.diffOk?16*k*k:(s.diff[k]||''))}" ${s.diffOk?'readonly class="ok"':''}></td></tr>`).join('')}
+    </tbody></table>${s.diffOk?'':'<button class="btn" id="cD2" style="margin-top:8px">Check</button>'}<div class="fb" id="fbD2"></div></div>`;
+  if(s.diffOk){ const ok=s.seen==='fall';
+    h+=`<div class="qstep ${ok?'doneStep':''}">${head(2,'Where have you seen these numbers?',ok)}
+    <p><b>16, 64, 144, 256, 400</b>. Where have we seen these before?</p>
+    ${choiceRow('seen',[{id:'fall',label:'Falling from the Sky: how far the rock fell'},{id:'garden',label:"Noah's Garden areas"},{id:'exp',label:'An exponential pattern'}],s.seen,'fall')}
+    ${fbChoice(s.seen,'fall',{fall:'✓ Those are exactly the distances the rock fell: <b>16t²</b>. Gravity pulls the cannonball down by 16t² feet, just like the falling rock.',garden:'Not quite. Think about the rock dropped from the 500-ft building.',exp:'Check the factors: 64 ÷ 16 = 4, but 144 ÷ 64 = 2.25. Not exponential! Where else did we see 16, 64, 144?'})}</div>`; }
+  if(s.seen==='fall') h+=`<div class="qstep ${s.eqOk?'doneStep':''}">${head(3,'Write the equation with gravity',s.eqOk)}
+    <p>Write an equation for the <b>actual</b> height <b>d</b> of the ball <b>t</b> seconds after it was fired.</p>
+    ${exInput('e2','d',s.eqOk?s.eq:(s.eqTry||''),s.eqOk)}
+    ${s.eqOk?'':'<button class="btn" id="cE2">Check</button><button class="btn" id="hE2" style="margin-left:6px">Hint</button>'}<div class="fb ${s.eqOk?'ok':''}" id="fbE2">${s.eqOk?'✓ <b>d = 10 + 406t − 16t²</b>: the no-gravity equation, minus what gravity pulls down.':''}</div></div>`;
+  if(s.eqOk) h+=`<div class="qstep">${head(4,'Think about it',false)}
+    <p>How are the two graphs alike? How are they different? <span class="small">(Your teacher can see your answer.)</span></p>
+    <textarea id="nt2" rows="3" placeholder="In the no-gravity graph I noticed ___, but in the with-gravity graph ___.">${esc(s.notice||'')}</textarea></div>
+    ${nextBtn(3,'Next: Another cannonball →','to3')}`;
+  P.innerHTML=h; bindKeys(P);
+  $$('[data-d2]').forEach(i=>i.oninput=()=>{s.diff[i.dataset.d2]=i.value;i.classList.remove('no');persist();});
+  const cD=$('#cD2'); if(cD) cD.onclick=()=>{let all=true,neg=false;$$('[data-d2]').forEach(i=>{const k=+i.dataset.d2,v=num(i.value),ok=v===16*k*k;if(v===-16*k*k)neg=true;mark(i,ok);if(!ok)all=false;});
+    if(all){s.diffOk=true;persist();draw2(sc2?sc2.t:0);upd2(true);}else fbSet('fbD2','no',neg?'Subtract the other way: no gravity − with gravity.':'Use the table on the left. At 1 second: 416 − 400 = ?');};
+  $$('[data-c="seen"]').forEach(b=>b.onclick=()=>{s.seen=b.dataset.v;persist();upd2(s.seen==='fall');});
+  const hE=$('#hE2'); if(hE) hE.onclick=()=>fbSet('fbE2','tip','Hint: start with the no-gravity equation, 10 + 406t. Gravity pulls it down by 16t² feet. Subtract!');
+  const cE=$('#cE2'); if(cE) cE.onclick=()=>{const el=$('#e2'),t=el.value.trim();s.eqTry=t;if(t)pushTry(s.eqTries,t);const pr=tryParse(t);
+    if(pr&&pr.hasVar&&equiv(pr.f,wg2)){s.eq=t;s.eqOk=true;unlock(3);persist();upd2(true);pushMe();return;} mark(el,false);persist();
+    let m='I can\'t read that. Use t for time.';
+    if(pr&&!pr.hasVar) m='Your equation needs <b>t</b> in it.';
+    else if(pr&&equiv(pr.f,ng1)) m='That\'s the no-gravity equation. Gravity pulls the ball down by 16t² feet.';
+    else if(pr&&equiv(pr.f,t=>10+406*t+16*t*t)) m='Gravity pulls the ball <b>down</b>, so subtract 16t².';
+    else if(pr&&equiv(pr.f,t=>406*t-16*t*t)) m='So close! Don\'t forget the cannon starts 10 ft off the ground.';
+    else if(pr&&equiv(pr.f,t=>10+406*t-16*t)) m='Gravity\'s pull is 16t², not 16t. Look at the difference row: 16, 64, 144…';
+    else if(pr) m=`Test it: when t = 2, your equation gives ${fmt(pr.f(2))}, but the table says 758 ft.`;
+    fbSet('fbE2','no',m);};
+  const nt=$('#nt2'); if(nt) nt.oninput=()=>{s.notice=nt.value;persist();};
+  const n=$('#to3'); if(n) n.onclick=()=>go(3);
+  if(scroll) scrollLast(P);
+}
+
+/* =====================================================================
+   STAGE 3: Another cannonball  d = 50 + 312t − 16t²
+   ===================================================================== */
+const c3=t=>50+312*t-16*t*t, T3=(312+Math.sqrt(312*312+3200))/32, VX=9.75, VY=c3(9.75);
+let sc3=null,g3=null;
+const TERMS=[{k:'a',term:'50'},{k:'b',term:'312t'},{k:'c',term:'−16t²'}];
+const MEAN=[{v:'',l:'Choose…'},{v:'start',l:'The starting height: 50 ft'},{v:'launch',l:'The launch: 312 ft higher each second'},{v:'grav',l:'Gravity pulling it down'}];
+const ANS3={a:'start',b:'launch',c:'grav'};
+function buildS3(){
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Stage 3</span><h2>Another cannonball</h2>
+    <p>The function <b class="eq">d = 50 + 312t − 16t²</b> gives the height in feet of a different cannonball <b>t</b> seconds after it leaves the cannon.</p></div>
+    <div class="split">${vizCard('v3','<div class="layers" id="lay3"></div>')}<div class="card panel" id="p3"></div></div></section>`;
+  sc3=CannonScene($('#v3S'),{H:2000,h0:50,f:c3,tEnd:T3});
+  g3=Graph($('#v3G'),{xMax:25,xStep:5,yMax:2000,yStep:250,yl:'Height (ft)'});
+  const s=state.s3;
+  const upd=t=>{$('#v3Out').textContent=`t = ${fmt(t,1)} s · ${fmt(Math.max(0,c3(t)),0)} ft`;draw3(t);};
+  $('#v3Spd').value='4';
+  $('#v3Go').onclick=()=>{ if(!s.estDone){ fbSet('fbEst','tip','Write your estimates first, then fire!'); const e=$('#estH'); if(e) e.focus(); return; }
+    runSim(sc3,+$('#v3Spd').value,upd,()=>{$('#v3Out').textContent=`💥 Lands at about ${fmt(T3,1)} s`;if(!s.fired){s.fired=true;persist();upd3(true);}}); };
+  $('#v3Reset').onclick=()=>{stopSim();sc3.set(0);upd(0);};
+  if(s.fired){sc3.set(T3);draw3(T3);} else draw3(0);
+  upd3(false);
+}
+function draw3(t){
+  const s=state.s3,g=g3; if(!g) return;
+  const L=s.layers||{};
+  let c='';
+  if(s.matchOk){ if(L.a) c+=`<path class="cv b" style="stroke-dasharray:3 6" d="${g.path(()=>50,0,25)}"/>`;
+    if(L.b) c+=`<path class="cv b" d="${g.path(x=>50+312*x,0,25)}"/>`; }
+  const domOk=s.dom==='land';
+  if(s.fired){ c+= domOk?`<path class="cv o" style="opacity:.2" d="${g.path(c3,0,25)}"/><path class="cv o" d="${g.path(c3,0,T3)}"/>`:`<path class="cv o" d="${g.path(c3,0,25)}"/>`; }
+  else if(t>0) c+=`<path class="cv o" d="${g.path(c3,0,t)}"/>`;
+  g.layer('curves').innerHTML=c;
+  let p='';
+  if(s.fired){ p+=`<circle class="pt o" cx="${g.X(VX)}" cy="${g.Y(VY)}" r="6"/><circle class="pt o" cx="${g.X(T3)}" cy="${g.Y(0)}" r="6"/>`; }
+  if(s.estDone&&isFinite(num(s.estT))&&isFinite(num(s.estH))) p+=`<circle class="pt x" cx="${g.X(clamp(num(s.estT),0,25))}" cy="${g.Y(clamp(num(s.estH),0,2000))}" r="6"><title>Your estimate</title></circle>`;
+  g.layer('pts').innerHTML=p;
+  g.layer('labs').innerHTML=s.fired?`<text class="glab" x="${g.X(VX)}" y="${g.Y(VY)-12}" text-anchor="middle" fill="#B44A00">max ≈ (9.75, 1,571)</text><text class="glab" x="${g.X(T3)-6}" y="${g.Y(0)-12}" text-anchor="end" fill="#B44A00">lands ≈ 19.7 s</text>`:'';
+  $('#v3N').innerHTML=`<span class="lg"><i style="background:var(--orange)"></i>d = 50 + 312t − 16t²</span>${s.estDone?'<span class="lg"><i style="background:var(--bad)"></i>Your estimate</span>':''}${s.matchOk&&(L.a||L.b)?'<span class="lg"><i style="background:var(--blue-d)"></i>Building blocks</span>':''}`;
+  const lay=$('#lay3'); if(lay) lay.innerHTML=s.matchOk?`<div class="small" style="margin-top:8px"><b>Build it on the graph:</b></div><div class="chipsel">
+    <label><input type="checkbox" data-l="a" ${L.a?'checked':''}> d = 50</label><label><input type="checkbox" data-l="b" ${L.b?'checked':''}> d = 50 + 312t</label></div>`:'';
+  $$('[data-l]').forEach(cb=>cb.onchange=()=>{s.layers=s.layers||{};s.layers[cb.dataset.l]=cb.checked;persist();draw3(sc3?sc3.t:0);});
+}
+function upd3(scroll){
+  const s=state.s3,P=$('#p3');
+  let h=`<div class="qstep ${s.matchOk?'doneStep':''}">${head(1,'What does each term mean?',s.matchOk)}
+    <p>What does each part of <b class="eq">50 + 312t − 16t²</b> tell us about the cannonball?</p>
+    ${TERMS.map(x=>`<div class="mrow"><span class="eq mterm">${x.term}</span><select data-m="${x.k}" ${s.matchOk?'disabled':''} class="${s.matchOk?'ok':''}">${MEAN.map(o=>`<option value="${o.v}" ${(s.match||{})[x.k]===o.v?'selected':''}>${o.l}</option>`).join('')}</select></div>`).join('')}
+    ${s.matchOk?'':'<button class="btn" id="cM3" style="margin-top:6px">Check</button>'}<div class="fb ${s.matchOk?'ok':''}" id="fbM3">${s.matchOk?'✓ Turn on the building blocks under the graph to see how each term shapes the path.':''}</div></div>`;
+  if(s.matchOk) h+=`<div class="qstep ${s.estDone?'doneStep':''}">${head(2,'Estimate first',s.estDone)}
+    <p>Before you fire: how high do you think this cannonball will go, and when will it reach the top?</p>
+    <div class="row"><span>Max height ≈</span><input class="num" id="estH" inputmode="decimal" value="${esc(s.estH||'')}" ${s.estDone?'readonly':''}> <span>ft</span></div>
+    <div class="row"><span>at t ≈</span><input class="num" id="estT" inputmode="decimal" value="${esc(s.estT||'')}" ${s.estDone?'readonly':''}> <span>seconds</span></div>
+    ${s.estDone?'':'<button class="btn primary" id="lock3" style="margin-top:8px">Lock in my estimate</button>'}
+    <div class="fb" id="fbEst">${s.estDone&&!s.fired?'🔒 Locked in! Now press <b>🔥 Fire!</b>':''}</div>
+    ${s.fired?`<div class="reveal" style="margin-top:8px">Actual: the ball tops out at about <b>1,571 ft</b> at <b>t = 9.75 s</b>.<br>Your estimate: ${fmt(num(s.estH),0)} ft at ${fmt(num(s.estT),2)} s. You were off by about <b>${fmt(Math.abs(num(s.estH)-VY),0)} ft</b>.</div>`:''}</div>`;
+  if(s.fired){
+    h+=`<div class="qstep ${s.landOk?'doneStep':''}">${head(3,'Splashdown',s.landOk)}
+    <p>Use the graph (or Desmos) to estimate when the ball hits the ground, to the nearest tenth of a second.</p>
+    <div class="row"><span>t ≈</span><input class="num ${s.landOk?'ok':''}" id="land" inputmode="decimal" value="${esc(s.land||'')}" ${s.landOk?'readonly':''}> <span>seconds</span>${s.landOk?'':'<button class="btn" id="cL3">Check</button>'}</div>
+    <div class="fb ${s.landOk?'ok':''}" id="fbL3">${s.landOk?'✓ About 19.7 seconds. Notice it\'s <b>not</b> exactly double 9.75. Why not? (It started 50 ft up!)':''}</div></div>`; }
+  if(s.landOk){ const ok=s.dom==='land';
+    h+=`<div class="qstep ${ok?'doneStep':''}">${head(4,'Domain',ok)}
+    <p>What domain is appropriate for this function?</p>
+    ${choiceRow('dom3',[{id:'all',label:'All real numbers'},{id:'ge0',label:'t ≥ 0'},{id:'land',label:'0 ≤ t ≤ 19.7'},{id:'25',label:'0 ≤ t ≤ 25'}],s.dom,'land')}
+    ${fbChoice(s.dom,'land',{land:'✓ From launch (t = 0) until it hits the ground (about 19.7 s). The faded part of the graph doesn\'t make sense here.',all:'Negative time is before the launch. Does that make sense?',ge0:'After about 19.7 s the ball is on the ground. Does the equation still describe it? (Check: d would be negative!)',['25']:'25 was just the graphing window. What happens to the ball at about 19.7 s?'})}</div>`; }
+  if(s.dom==='land'){ const ok=s.rng==='0max';
+    h+=`<div class="qstep ${ok?'doneStep':''}">${head(5,'Range',ok)}
+    <p>What range is appropriate for this function?</p>
+    ${choiceRow('rng3',[{id:'0max',label:'0 ≤ d ≤ 1,571'},{id:'50max',label:'50 ≤ d ≤ 1,571'},{id:'ge0',label:'d ≥ 0'},{id:'2000',label:'0 ≤ d ≤ 2,000'}],s.rng,'0max')}
+    ${fbChoice(s.rng,'0max',{['0max']:'✓ The lowest height is 0 (the ground) and the highest is about 1,571 ft at the top.',['50max']:'It starts at 50 ft, but where does it end up? Does the height ever drop below 50?',ge0:'Is there a highest point the ball reaches?',['2000']:'2,000 was the graphing window. Does the ball actually reach 2,000 ft?'})}</div>`; }
+  if(s.rng==='0max'){
+    const v=s.v||800, mx=50+v*v/64;
+    h+=`<div class="qstep ${s.mile==='yes'?'doneStep':''}">${head(0,'⭐ Are you ready for more?',s.mile==='yes')}
+    <p>If the cannonball were fired at <b>800 feet per second</b>, would it reach a <b>mile</b> (5,280 ft) high? Try different launch speeds.</p>
+    <label class="small" for="vs">Launch speed: <b id="vv">${v}</b> ft/s</label><input class="slider" type="range" id="vs" min="100" max="900" step="50" value="${v}">
+    <div class="race"><div class="q">Equation<b class="eq" id="veq" style="font-size:1.05rem">d = 50 + ${v}t − 16t²</b></div><div class="e">Max height<b id="vmx">${fmt(mx,0)} ft</b><span class="small" id="vmi">${fmt(mx/5280,2)} miles</span></div></div>
+    <p style="margin-top:10px">At 800 ft/s, does it reach a mile?</p>
+    ${choiceRow('mile',[{id:'yes',label:'Yes'},{id:'no',label:'No'}],s.mile,'yes')}
+    ${fbChoice(s.mile,'yes',{yes:'✓ It reaches about <b>10,050 ft</b>, almost 2 miles! The top is at t = 800 ÷ 32 = 25 s.',no:'Slide to 800 and look at the max height.'})}</div>`;
+    if(s.mile==='yes') h+=nextBtn(4,'Next: Domain detective →','to4'); }
+  P.innerHTML=h;
+  const cM=$('#cM3'); if(cM) cM.onclick=()=>{s.match=s.match||{};let all=true;$$('[data-m]').forEach(sel=>{s.match[sel.dataset.m]=sel.value;const ok=sel.value===ANS3[sel.dataset.m];mark(sel,ok);if(!ok)all=false;});
+    persist(); if(all){s.matchOk=true;s.layers={a:true,b:true};persist();draw3(0);upd3(true);} else fbSet('fbM3','no','Not quite. Hint: which term has no t in it? Which one is negative?');};
+  const lk=$('#lock3'); if(lk) lk.onclick=()=>{const H=num($('#estH').value),T=num($('#estT').value);
+    if(!isFinite(H)||!isFinite(T)) return fbSet('fbEst','no','Enter both a height and a time.');
+    s.estH=String(H);s.estT=String(T);s.estDone=true;persist();pushMe();upd3(false);draw3(0);};
+  const cL=$('#cL3'); if(cL) cL.onclick=()=>{const el=$('#land'),v=num(el.value);s.land=el.value;
+    if(v>=19.6&&v<=19.8){s.landOk=true;persist();upd3(true);return;} mark(el,false);persist();
+    fbSet('fbL3','no',v===19.5?'That\'s double 9.75, but the ball started 50 ft up, so it takes a little longer to come down.':v>=19&&v<=20.4?'Close! Zoom in. Find where the curve crosses the horizontal axis, to the nearest tenth.':'Find where the orange curve hits the ground (height = 0).');};
+  $$('[data-c="dom3"]').forEach(b=>b.onclick=()=>{s.dom=b.dataset.v;persist();draw3(sc3?sc3.t:T3);upd3(s.dom==='land');});
+  $$('[data-c="rng3"]').forEach(b=>b.onclick=()=>{s.rng=b.dataset.v;persist();upd3(s.rng==='0max');});
+  const vs=$('#vs'); if(vs) vs.oninput=e=>{s.v=+e.target.value;persist();const v=s.v,mx=50+v*v/64;$('#vv').textContent=v;$('#veq').textContent=`d = 50 + ${v}t − 16t²`;$('#vmx').textContent=fmt(mx,0)+' ft';$('#vmi').textContent=fmt(mx/5280,2)+' miles';};
+  $$('[data-c="mile"]').forEach(b=>b.onclick=()=>{s.mile=b.dataset.v;persist();upd3(s.mile==='yes');});
+  const n=$('#to4'); if(n) n.onclick=()=>go(4);
+  if(scroll) scrollLast(P);
+}
+
+/* =====================================================================
+   STAGE 4: Domain detective
+   ===================================================================== */
+const CARDS=[
+  {id:'garden',icon:'🌱',title:"Noah's garden",desc:'The area A of a rectangular garden with <b>50 m</b> of fence and length L meters.',eq:'A(L) = L(25 − L)',f:L=>L*(25-L),
+   win:{xMin:-5,xMax:30,xStep:5,yMin:-160,yMax:200,yStep:40,xl:'Length L (m)',yl:'Area (m²)'},dom:[0,25],vtx:[12.5,156.25],zeros:[0,25],
+   qs:[{k:'dom',q:'What domain makes sense?',opts:['All real numbers','L ≥ 0','0 ≤ L ≤ 25','0 ≤ L ≤ 50'],ans:2,ok:'A length can\'t be negative, and since L + W = 25, the length can be at most 25 m.',no:'Can a length be negative? And how long can one side be if L + W = 25?'},
+       {k:'ver',q:'The vertex is (12.5, 156.25). What does it mean?',opts:['The biggest garden: 12.5 m × 12.5 m gives 156.25 m²','The garden is 156.25 m long','It uses 12.5 m of fence'],ans:0,ok:'The square garden gives the maximum area.',no:'The vertex is the highest point. What is the largest output here?'},
+       {k:'zer',q:'The zeros are L = 0 and L = 25. What do they mean?',opts:['No garden at all: one side would be 0 m','The garden has the largest area','The fence is 25 m long'],ans:0,ok:'With L = 0 or L = 25 (so W = 0), the area is 0.',no:'A zero is where the output (area) is 0.'}]},
+  {id:'fall',icon:'🪨',title:'Distance fallen',desc:'The distance g in feet an object has fallen t seconds after being dropped from a <b>576-ft</b> building.',eq:'g(t) = 16t²',f:t=>16*t*t,
+   win:{xMin:-8,xMax:8,xStep:2,yMin:-100,yMax:1100,yStep:200,xl:'Time t (s)',yl:'Distance fallen (ft)'},dom:[0,6],vtx:[0,0],zeros:[0],
+   qs:[{k:'dom',q:'What domain makes sense?',opts:['All real numbers','t ≥ 0','0 ≤ t ≤ 6','0 ≤ t ≤ 576'],ans:2,ok:'Time starts at 0, and the object hits the ground at 6 s (16 · 6² = 576).',no:'When does time start? And when does the object hit the ground from 576 ft?'},
+       {k:'ver',q:'The vertex is (0, 0). What does it mean?',opts:['The moment it\'s dropped: it hasn\'t fallen yet','The highest point it reaches','When it hits the ground'],ans:0,ok:'At t = 0 it has fallen 0 feet.',no:'What is happening at t = 0?'},
+       {k:'zer',q:'The only zero is t = 0. What does it mean?',opts:['At the start, it has fallen 0 feet','It hits the ground','It stops falling'],ans:0,ok:'The distance fallen is 0 only at the very start.',no:'A zero is where the output (distance fallen) is 0.'}]},
+  {id:'height',icon:'🏢',title:'Height above ground',desc:'The height h in feet of an object t seconds after being dropped from <b>576 ft</b>.',eq:'h(t) = 576 − 16t²',f:t=>576-16*t*t,
+   win:{xMin:-8,xMax:8,xStep:2,yMin:-500,yMax:700,yStep:200,xl:'Time t (s)',yl:'Height (ft)'},dom:[0,6],vtx:[0,576],zeros:[-6,6],
+   qs:[{k:'dom',q:'What domain makes sense?',opts:['All real numbers','t ≥ 0','0 ≤ t ≤ 6','−6 ≤ t ≤ 6'],ans:2,ok:'From the drop (t = 0) until it hits the ground (t = 6).',no:'Negative time is before the drop. What happens after 6 seconds?'},
+       {k:'ver',q:'The vertex is (0, 576). What does it mean?',opts:['Its starting height, the moment it\'s dropped','Its top speed','When it lands'],ans:0,ok:'The highest point is where it starts: 576 ft.',no:'What is the height at t = 0?'},
+       {k:'zer',q:'The zeros are t = −6 and t = 6. Which one makes sense, and what does it mean?',opts:['t = 6: it hits the ground after 6 seconds','t = −6: it hit the ground 6 seconds early','Both: it lands twice'],ans:0,ok:'Only t = 6 is in the domain. That\'s when the height is 0.',no:'Is negative time in our domain?'}]},
+  {id:'profit',icon:'💊',title:'Insulin profit',desc:'Profit p, in millions of dollars, from selling v million vials of insulin.',eq:'p(v) = −0.3v² + 150v',f:v=>-0.3*v*v+150*v,
+   win:{xMin:-100,xMax:600,xStep:100,yMin:-20000,yMax:22000,yStep:5000,xl:'Vials sold v (millions)',yl:'Profit ($ millions)'},dom:[0,500],vtx:[250,18750],zeros:[0,500],
+   qs:[{k:'dom',q:'For what values of v is the profit positive (p(v) > 0)?',opts:['0 < v < 500','0 < v < 250','v > 250','v > 500'],ans:0,ok:'Between 0 and 500 million vials, the graph is above the axis, so the company makes a profit.',no:'Positive means <b>above</b> the horizontal axis, not going up.'},
+       {k:'ver',q:'The vertex is (250, 18,750). What does it mean?',opts:['Selling 250 million vials gives the maximum profit: $18,750 million','The company sells 18,750 million vials','The profit is $250 million'],ans:0,ok:'That\'s about $18.75 billion, the most the company can make.',no:'Which number is vials and which is profit?'},
+       {k:'zer',q:'The zeros are v = 0 and v = 500. What do they mean?',opts:['Break-even: no profit and no loss','The most profit','The company stops selling'],ans:0,ok:'At 0 and 500 million vials, profit is exactly 0.',no:'A zero is where the output (profit) is 0.'}]}
+];
+let g4=null;
+function buildS4(){
+  const s=state.s4, cur=s.card||0;
+  const doneCard=c=>CARDS[c].qs.every(q=>(s.a[CARDS[c].id+q.k])===q.ans);
+  $('#stage').innerHTML=`<section>
+    <div class="intro"><span class="tag">Stage 4</span><h2>Domain detective</h2>
+    <p>Graphing technology shows the <b>whole</b> parabola, but a situation only uses part of it. For each function, find the domain that makes sense, then explain what the <b>vertex</b> and <b>zeros</b> mean.</p></div>
+    <div class="cardtabs">${CARDS.map((c,i)=>`<button class="ctab ${i===cur?'on':''}" data-card="${i}">${c.icon} ${c.title}${doneCard(i)?' <span class="ck">✓</span>':''}</button>`).join('')}</div>
+    <div class="split"><div class="card sticky"><div class="fhead"><div><b>${CARDS[cur].title}</b><div class="small">${CARDS[cur].desc}</div></div><div class="eq feq">${CARDS[cur].eq}</div></div><div id="g4"></div><div class="gnote" id="n4"></div></div>
+    <div class="card panel" id="p4"></div></div></section>`;
+  $$('[data-card]').forEach(b=>b.onclick=()=>{s.card=+b.dataset.card;persist();buildS4();});
+  g4=Graph($('#g4'),CARDS[cur].win);
+  upd4(false);
+}
+function draw4(){
+  const s=state.s4, C=CARDS[s.card||0], g=g4, a=k=>s.a[C.id+k]===C.qs.find(q=>q.k===k).ans;
+  let c='', p='', l='';
+  if(a('dom')){ const [d0,d1]=C.dom;
+    if(C.id==='profit') c+=`<rect x="${g.X(0)}" y="${g.y1}" width="${g.X(500)-g.X(0)}" height="${g.Y(0)-g.y1}" fill="rgba(30,158,90,.08)"/>`;
+    c+=`<path class="cv o" style="opacity:.18" d="${g.path(C.f)}"/><path class="cv o" d="${g.path(C.f,d0,d1)}"/>`;
+    if(C.id==='profit') c+=`<path class="cv o" style="opacity:.55;stroke-dasharray:6 6" d="${g.path(C.f,500,600)}"/>`;
+  } else c+=`<path class="cv o" d="${g.path(C.f)}"/>`;
+  if(a('ver')){ p+=`<circle class="pt b" cx="${g.X(C.vtx[0])}" cy="${g.Y(C.vtx[1])}" r="7"/>`; l+=`<text class="glab" x="${g.X(C.vtx[0])}" y="${g.Y(C.vtx[1])-13}" text-anchor="middle" fill="#2F7AB0">vertex (${fmt(C.vtx[0])}, ${fmt(C.vtx[1])})</text>`; }
+  if(a('zer')) C.zeros.forEach(z=>{const inD=z>=C.dom[0]-1e-9&&z<=C.dom[1]+1e-9; p+=`<circle class="pt ${inD?'g':'x'}" cx="${g.X(z)}" cy="${g.Y(0)}" r="7" style="${inD?'':'opacity:.45'}"/>`; });
+  g.layer('curves').innerHTML=c; g.layer('pts').innerHTML=p; g.layer('labs').innerHTML=l;
+  $('#n4').innerHTML=a('dom')?`<span class="lg"><i style="background:var(--orange)"></i>${C.id==='profit'?'Profit (solid where p(v) > 0)':'Part that makes sense'}</span><span class="lg"><i style="background:var(--orange);opacity:.25"></i>Doesn't fit the situation</span>${C.id==='profit'?'<span class="lg"><i style="background:var(--orange);opacity:.55"></i>Dashed: loses money (p(v) < 0)</span>':''}`:'<span class="lg"><i style="background:var(--orange)"></i>The whole parabola</span>';
+}
+function upd4(scroll){
+  const s=state.s4, C=CARDS[s.card||0], P=$('#p4');
+  draw4();
+  let h='', prevOk=true;
+  C.qs.forEach((q,i)=>{ if(!prevOk) return; const key=C.id+q.k, picked=s.a[key], ok=picked===q.ans;
+    h+=`<div class="qstep ${ok?'doneStep':''}">${head(i+1,q.k==='dom'?(C.id==='profit'?'Where is it positive?':'Domain'):q.k==='ver'?'Vertex':'Zeros',ok)}<p>${q.q}</p>
+      <div class="choices">${q.opts.map((o,j)=>`<button class="choice ${picked===j?(ok?'ok':'no'):''}" data-q="${key}" data-j="${j}" ${ok?'disabled':''}>${o}</button>`).join('')}</div>
+      ${picked!=null?`<div class="fb ${ok?'ok':'no'}">${ok?'✓ '+q.ok:q.no}</div>`:''}</div>`;
+    prevOk=ok; });
+  const allDone=CARDS.every(c=>c.qs.every(q=>s.a[c.id+q.k]===q.ans));
+  const thisDone=C.qs.every(q=>s.a[C.id+q.k]===q.ans);
+  if(thisDone&&!allDone){ const nx=CARDS.findIndex((c,i)=>!c.qs.every(q=>s.a[c.id+q.k]===q.ans)); h+=`<button class="btn primary big" data-card="${nx}">Next: ${CARDS[nx].icon} ${CARDS[nx].title} →</button>`; }
+  if(allDone) h+=`<div class="celebrate">🎉 <b>Case closed!</b> The <b>domain</b> depends on the situation, the <b>vertex</b> is the maximum (or the starting point), and the <b>zeros</b> are where the output is 0: no garden, the ground, or break-even.</div>`;
+  P.innerHTML=h;
+  $$('[data-q]',P).forEach(b=>b.onclick=()=>{s.a[b.dataset.q]=+b.dataset.j;persist();const C2=CARDS[s.card||0];const done=C2.qs.every(q=>s.a[C2.id+q.k]===q.ans);if(done)buildS4();else upd4(true);});
+  $$('[data-card]',P).forEach(b=>b.onclick=()=>{s.card=+b.dataset.card;persist();buildS4();window.scrollTo({top:0,behavior:'smooth'});});
+  if(scroll) scrollLast(P);
+}
+
+(function boot(){
+  if(teacherAll) return startSolo();
+  const saved=LS.get('cannon:live'), qcode=(params.get('code')||'').toUpperCase(), qname=params.get('name');
+  if(qcode&&qname){ showJoin('Joining…'); return joinLive(qcode,qname,!!params.get('demo')); }
+  if(saved&&saved.code&&(!qcode||qcode===saved.code)){ showJoin('Reconnecting…'); return joinLive(saved.code,saved.name,!!saved.demo); }
+  if(LS.get(KEY)&&!qcode) return startSolo();
+  showJoin();
+})();
+})();
+</script>
+<!-- Calculator boxes: number boxes can do arithmetic (e.g. 100+300 → 400, 16(6)^2 → 576). Equation boxes (.ex) are left alone. -->
+<style>
+.calcTip{position:fixed;z-index:70;background:#13294B;color:#fff;font:600 .85rem Lexend,system-ui,sans-serif;padding:4px 10px;border-radius:8px;pointer-events:none;white-space:nowrap;box-shadow:0 4px 14px rgba(19,41,75,.25)}
+.calcTip b{color:#FFD2B0;font-size:.95rem}
+.calcTip small{opacity:.75;font-weight:400;margin-left:6px}
+.calcTip::before{content:"";position:absolute;top:-5px;left:14px;border:5px solid transparent;border-top:0;border-bottom-color:#13294B}
+</style>
+<script>
+(function(){
+  function evalArith(src){
+    let s=String(src||'').replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/[×·•∙xX*]/g,'*').replace(/÷/g,'/').replace(/²/g,'^2').replace(/³/g,'^3').replace(/,(?=\d{3}(\D|$))/g,'');
+    if(!s||!/^[0-9.+\-*/^()√]+$/.test(s)) return null;
+    if(/^-?\d*\.?\d+$/.test(s)) return null;               // already just a number
+    const t=[];let i=0;
+    while(i<s.length){const c=s[i];
+      if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;const v=parseFloat(s.slice(i,j));if(isNaN(v)||(s.slice(i,j).split('.').length>2))return null;t.push({k:'n',v});i=j;continue;}
+      t.push({k:c});i++;}
+    const o=[];t.forEach((b,k)=>{const a=t[k-1];if(a&&(a.k==='n'||a.k===')')&&(b.k==='n'||b.k==='('||b.k==='√'))o.push({k:'*'});o.push(b);});
+    let p=0;const pk=()=>o[p],eat=k=>{if(o[p]&&o[p].k===k){p++;return true;}return false;};
+    function E(){let v=T();while(pk()&&(pk().k==='+'||pk().k==='-')){const op=o[p++].k,w=T();v=op==='+'?v+w:v-w;}return v;}
+    function T(){let v=U();while(pk()&&(pk().k==='*'||pk().k==='/')){const op=o[p++].k,w=U();v=op==='*'?v*w:v/w;}return v;}
+    function U(){if(eat('-'))return -U();if(eat('+'))return U();if(eat('√'))return Math.sqrt(U());return P();}
+    function P(){const b=A();if(eat('^'))return Math.pow(b,U());return b;}
+    function A(){const x=o[p++];if(!x)throw 0;if(x.k==='n')return x.v;if(x.k==='('){const v=E();if(!eat(')'))throw 0;return v;}throw 0;}
+    try{const v=E();if(p!==o.length||!isFinite(v))return null;return Math.round(v*1e6)/1e6;}catch(e){return null;}
+  }
+  const isCalcBox=el=>el&&el.tagName==='INPUT'&&!el.readOnly&&!el.classList.contains('ex')&&/^(decimal|numeric)$/.test(el.getAttribute('inputmode')||'');
+  const tip=document.createElement('div');tip.className='calcTip';tip.hidden=true;document.body.appendChild(tip);
+  let cur=null;
+  function show(el){
+    const v=evalArith(el.value);
+    if(v==null){tip.hidden=true;return;}
+    tip.innerHTML=`= <b>${String(v)}</b><small>press Enter</small>`;
+    const r=el.getBoundingClientRect();tip.style.left=Math.max(4,r.left)+'px';tip.style.top=(r.bottom+6)+'px';tip.hidden=false;
+  }
+  function commit(el){
+    const v=evalArith(el.value); tip.hidden=true;
+    if(v==null) return false;
+    el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));
+    return true;
+  }
+  document.addEventListener('input',e=>{ if(isCalcBox(e.target)){cur=e.target;show(e.target);} },true);
+  document.addEventListener('focusin',e=>{ if(isCalcBox(e.target)){cur=e.target;show(e.target);} });
+  document.addEventListener('focusout',e=>{ if(isCalcBox(e.target)){commit(e.target);cur=null;} });
+  document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&isCalcBox(e.target)&&evalArith(e.target.value)!=null){ e.preventDefault(); e.stopPropagation(); commit(e.target); show(e.target); } },true);
+  // Clicking Check counts too: convert before the click handler reads the box
+  document.addEventListener('pointerdown',e=>{ if(cur&&e.target!==cur) commit(cur); },true);
+  window.addEventListener('scroll',()=>{ if(cur&&!tip.hidden) show(cur); },true);
+  window.addEventListener('resize',()=>{ if(cur&&!tip.hidden) show(cur); });
+})();
+</script>
+
+</body>
+</html>

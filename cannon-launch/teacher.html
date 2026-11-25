@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cannon Launch · Teacher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#4B9CD3;--blue-d:#2F7AB0;--navy:#13294B;--orange:#F56600;--orange-l:#FFE3CF;--bg:#F4F8FC;--line:#DCE5EF;--muted:#5B6678;--good:#1E9E5A;--bad:#D64545;--ink:#1B2433}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lexend,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff}
+.hwrap{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--orange);display:grid;place-items:center;font-size:24px}
+.brand h1{margin:0;font-size:1.3rem}.brand p{margin:0;font-size:.85rem;color:#BFD8EE}
+.hb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hbtn{background:transparent;border:1px solid #4A6488;color:#DCE8F5;border-radius:10px;padding:8px 12px;font:inherit;font-size:.85rem;cursor:pointer;text-decoration:none}
+.hbtn:hover{background:#1F3A63}.hbtn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.codebar{max-width:1280px;margin:0 auto;padding:0 20px 14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.code{background:#fff;color:var(--navy);border-radius:12px;padding:6px 16px;font-weight:800;font-size:2rem;letter-spacing:.25em}
+.joinurl{color:#DCE8F5;font-size:.95rem}.joinurl b{color:#fff}
+.count{margin-left:auto;background:#1F3A63;border-radius:10px;padding:8px 12px;font-size:.9rem}
+main{max-width:1280px;margin:0 auto;padding:18px 16px 40px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 1px 2px rgba(19,41,75,.05),0 6px 20px rgba(19,41,75,.05)}
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:800px){.phases{grid-template-columns:repeat(2,1fr)}}
+.ph{border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.ph.cur{border-color:var(--blue);background:#EEF6FD}
+.ph h3{margin:0;font-size:1rem;color:var(--navy)}.ph small{color:var(--muted);font-size:.8rem}
+.ph .here{font-size:.85rem;color:var(--muted)}
+.btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--navy);padding:8px 14px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--bad)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{padding:12px 18px;font-size:1rem}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{border:0;background:#E6EEF6;color:var(--navy);font:inherit;font-weight:600;padding:8px 14px;border-radius:10px;cursor:pointer}
+.tab.on{background:var(--navy);color:#fff}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.grid2.wl{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+@media(max-width:900px){.grid2,.grid2.wl{grid-template-columns:1fr}}
+h2{margin:0 0 10px;color:var(--navy);font-size:1.1rem}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pill{background:#EEF5FB;border-radius:99px;padding:6px 12px;font-size:.88rem;color:var(--navy)}.pill b{color:var(--blue-d)}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{background:#EEF5FB;color:var(--navy);font-weight:600;padding:8px;text-align:left}
+.tbl td{padding:7px 8px;border-bottom:1px solid #EEF2F6;vertical-align:top}
+.tbl td.c,.tbl th.c{text-align:center}
+.bars .row{display:grid;grid-template-columns:minmax(120px,1.2fr) 2fr 36px;gap:10px;align-items:center;margin-bottom:8px;font-size:.88rem}
+.bar{height:24px;background:#E5ECF3;border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px;background:var(--blue)}
+.bar i.ok{background:var(--good)}.bar i.no{background:#E9A3A3}
+.eq{font-family:"Cambria Math",Cambria,"Times New Roman",serif;font-size:1.05rem}
+.ok{color:var(--good)}.no{color:var(--bad)}.dim{color:#A0AABB}
+.tries{font-size:.75rem;color:var(--muted)}
+.steps{display:inline-flex;gap:3px}.steps i{width:14px;height:8px;border-radius:4px;background:#E1E8F0;display:block}.steps i.on{background:var(--good)}
+.online{display:inline-block;width:9px;height:9px;border-radius:50%;background:#C3CCD8;margin-right:6px}.online.y{background:var(--good)}
+.tag{font-size:.7rem;background:var(--orange-l);color:#B44A00;border-radius:99px;padding:1px 7px;font-weight:600}
+.landing{max-width:480px;margin:40px auto;display:flex;flex-direction:column;gap:14px;text-align:center}
+.landing h2{font-size:1.5rem}
+.err{color:var(--bad);font-weight:600;min-height:1.2em;margin:0}
+.banner{background:#FFF4EC;border:1px solid #FFD2B0;border-radius:12px;padding:10px 12px;font-size:.88rem;color:#7A3A0B;text-align:left}
+.empty{color:var(--muted);font-size:.92rem;padding:10px 0}
+.note{font-size:.85rem;color:var(--muted);margin:6px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#FFF1E6;border-radius:8px;padding:3px 9px;font-size:.88rem}
+.chip.ok{background:#EAF8F0;color:var(--good);font-weight:700}
+.stack{display:flex;flex-direction:column;gap:14px}
+#pv{display:none}#pv.on{display:block}
+.pvbar{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pvbar .lbl{font-weight:700;color:var(--navy);margin-right:6px}
+.pvbar .sbtn{font:inherit;font-weight:600;font-size:.85rem;border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:10px;padding:6px 12px;cursor:pointer}
+.pvbar .sbtn.cur{background:var(--blue);border-color:var(--blue);color:#fff}
+.pvbar .frz{margin-left:auto;font-size:.85rem;font-weight:700;border-radius:99px;padding:5px 12px;background:#EEF5FB;color:var(--navy)}
+.pvbar .frz.on{background:var(--orange);color:#fff}
+.pvframe{display:block;width:100%;border:0;border-top:1px solid var(--line);background:#fff}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand"><div class="logo">💥</div><div><h1>Lesson 3: Cannon Launch</h1><p>Teacher dashboard</p></div></div>
+    <div class="hb" id="hb"></div>
+  </div>
+  <div class="codebar" id="codebar"></div>
+</header>
+<main id="app"></main>
+<div id="pv"><div class="pvbar" id="pvbar"></div><iframe class="pvframe" id="pvf" title="Student view"></iframe></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDkuZVoCbhVotMLGi_iI8wGYCrRKie8ex8",
+  authDomain: "exponentproperties-7198b.firebaseapp.com",
+  databaseURL: "https://exponentproperties-7198b-default-rtdb.firebaseio.com",
+  projectId: "exponentproperties-7198b",
+  appId: "1:189445254765:web:3e6f1c783f9b6fdfa85964"
+};
+const DB = (() => {
+  const live = !!FIREBASE_CONFIG.databaseURL && typeof firebase !== 'undefined';
+  if (live) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const fdb = firebase.database();
+    let offset = 0;
+    fdb.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+    return {
+      mode: 'live', ts: () => firebase.database.ServerValue.TIMESTAMP, now: () => Date.now() + offset,
+      set: (p, v) => fdb.ref(p).set(v), update: (p, v) => fdb.ref(p).update(v), remove: p => fdb.ref(p).remove(),
+      once: p => fdb.ref(p).once('value').then(s => s.val()),
+      on: (p, cb) => { const r = fdb.ref(p); const h = r.on('value', s => cb(s.val())); return () => r.off('value', h); }
+    };
+  }
+  const KEY = 'cannon:tree', subs = [];
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  const get = (t, p) => { const v = p.split('/').reduce((o, k) => (o == null ? null : o[k]), t); return v === undefined ? null : v; };
+  const clone = v => (v == null ? null : JSON.parse(JSON.stringify(v)));
+  const notify = () => { const t = read(); subs.slice().forEach(s => s.cb(clone(get(t, s.p)))); };
+  window.addEventListener('storage', e => { if (e.key === KEY) notify(); });
+  function write(p, v) {
+    const t = read(), ks = p.split('/'); let o = t;
+    ks.slice(0, -1).forEach(k => { if (typeof o[k] !== 'object' || o[k] === null) o[k] = {}; o = o[k]; });
+    if (v === null) delete o[ks[ks.length - 1]]; else o[ks[ks.length - 1]] = v;
+    localStorage.setItem(KEY, JSON.stringify(t)); notify();
+  }
+  return {
+    mode: 'local', ts: () => Date.now(), now: () => Date.now(),
+    set: (p, v) => { write(p, clone(v)); return Promise.resolve(); },
+    update: (p, v) => { Object.keys(v).forEach(k => write(p + '/' + k, clone(v[k]))); return Promise.resolve(); },
+    remove: p => { write(p, null); return Promise.resolve(); },
+    once: p => Promise.resolve(clone(get(read(), p))),
+    on: (p, cb) => { const s = { p, cb }; subs.push(s); setTimeout(() => { if (subs.includes(s)) cb(clone(get(read(), p))); }, 0); return () => { const i = subs.indexOf(s); if (i >= 0) subs.splice(i, 1); }; }
+  };
+})();
+
+(function(){
+const APP='cannon-launch';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get:k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
+const pretty=t=>esc(String(t||'').trim().replace(/^[a-zA-Z](\([a-zA-Z]\))?\s*=\s*/,'')).replace(/\*/g,' · ').replace(/\^2/g,'²').replace(/-/g,' − ').replace(/\+/g,' + ').replace(/\s+/g,' ').replace(/\(\s/g,'(').replace(/\s\)/g,')').trim();
+const studentURL=()=>new URL('./',location.href).href;
+
+let pvOn=false;
+let CODE=null, ST={stage:1,freeze:false}, STU={}, unsubs=[], tab=1, userTab=false, hide=!!LS.get('cannon:hide');
+const base=()=>`sessions/${CODE}`;
+
+function landing(msg){
+  setPv(false); const pf=document.getElementById('pvf'); if(pf) pf.removeAttribute('src');
+  unsubs.forEach(u=>u()); unsubs=[]; CODE=null; $('#codebar').innerHTML=''; $('#hb').innerHTML=`<a class="hbtn" href="./">Student view</a>`;
+  const saved=LS.get('cannon:teacher');
+  $('#app').innerHTML=`<div class="landing card"><h2>Start a class session</h2>
+    ${DB.mode==='local'?'<div class="banner"><b>Practice mode:</b> the live connection isn\'t available, so this only syncs with student tabs in this same browser.</div>':''}
+    <p class="note" style="margin:0">Students go to the Cannon Launch page and type the 4-letter code you get.</p>
+    <button class="btn primary big" id="newS">Start a new session</button>
+    ${saved?`<button class="btn big" id="resS">Resume session ${esc(saved.code)}</button>`:''}
+    <p class="err" id="err">${esc(msg||'')}</p></div>`;
+  $('#newS').onclick=newSession; const r=$('#resS'); if(r) r.onclick=()=>resume(saved.code);
+}
+function genCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<4;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
+async function newSession(){
+  try{ let code; for(let i=0;i<12;i++){code=genCode(); if(!(await DB.once(`sessions/${code}/state`))) break;}
+    await DB.set(`sessions/${code}`,{app:APP,created:DB.ts(),state:{stage:1,freeze:false}}); LS.set('cannon:teacher',{code}); start(code);
+  }catch(e){ $('#err').textContent='Could not reach the database. Check the setup and rules.'; }
+}
+async function resume(code){
+  try{ const st=await DB.once(`sessions/${code}/state`); if(!st){ LS.del('cannon:teacher'); return landing('That session no longer exists.'); } start(code); }
+  catch(e){ $('#err').textContent='Could not reach the database.'; }
+}
+function start(code){
+  CODE=code; tab=1; userTab=false;
+  unsubs.push(DB.on(`${base()}/state`,st=>{ if(!st){ LS.del('cannon:teacher'); return landing('Session ended.'); }
+    const prev=ST.stage; ST={stage:st.stage||1,freeze:!!st.freeze}; if(!userTab||prev!==ST.stage){tab=ST.stage;userTab=false;} renderAll(); }));
+  unsubs.push(DB.on(`${base()}/students`,v=>{ STU=v||{}; renderAll(); }));
+  setInterval(()=>{ if(CODE&&tab===5) renderBody(); },15000);
+}
+function roster(){ return Object.entries(STU).filter(([k,v])=>v&&v.name).map(([sid,v])=>({sid,...v,work:v.work||{}})).sort((a,b)=>(a.joined||0)-(b.joined||0)); }
+const real=()=>roster().filter(s=>!s.demo);
+function nameOf(s){ if(s.demo) return esc(s.name)+' <span class="tag">you</span>'; if(!hide) return esc(s.name); return 'Student '+(real().findIndex(x=>x.sid===s.sid)+1); }
+const online=s=>s.seen&&DB.now()-s.seen<75000;
+
+function renderAll(){ renderHeader(); renderBody(); }
+// In-dashboard student preview. It joins as "Teacher" (a demo student: not counted, and never frozen).
+function sizePv(){ const f=$('#pvf'); if(!pvOn||!f) return; f.style.height=Math.max(400,window.innerHeight-f.getBoundingClientRect().top-4)+'px'; }
+window.addEventListener('resize',sizePv);
+function setPv(on){
+  pvOn=!!on; const pv=$('#pv'), app=$('#app'); if(!pv) return;
+  pv.classList.toggle('on',pvOn); app.style.display=pvOn?'none':'';
+  if(pvOn){ const f=$('#pvf'); if(!f.getAttribute('src')) f.src=`${studentURL()}?code=${CODE}&name=${encodeURIComponent('Teacher')}&demo=1`; }
+  if(CODE){ renderHeader(); } setTimeout(sizePv,0); window.scrollTo({top:0});
+}
+function renderPvBar(){
+  const b=$('#pvbar'); if(!b||!CODE) return;
+  const cur=ST.stage;
+  b.innerHTML=`<span class="lbl">👁 Student view</span>${STG.map(p=>`<button class="sbtn ${p.n===cur?'cur':''}" data-pvmove="${p.n}" title="Move the class to Stage ${p.n}">Stage ${p.n}${p.n===cur?' ✓':''}</button>`).join('')}
+    <span class="frz ${ST.freeze?'on':''}">${ST.freeze?'⏸ Students are frozen (your view still works)':'▶ Students can work'}</span>`;
+  $$('[data-pvmove]',b).forEach(x=>x.onclick=()=>DB.update(`${base()}/state`,{stage:+x.dataset.pvmove}));
+}
+function renderHeader(){
+  const n=real().length, on=real().filter(online).length;
+  $('#hb').innerHTML=`<button class="hbtn ${pvOn?'on':''}" id="pvBtn">${pvOn?'📊 Back to dashboard':'👁 Student view'}</button>
+    <button class="hbtn ${ST.freeze?'on':''}" id="frz">${ST.freeze?'▶ Unfreeze screens':'⏸ Freeze screens'}</button>
+    <button class="hbtn ${hide?'on':''}" id="hide">${hide?'Show names':'Hide names'}</button>
+    <button class="hbtn" id="end">End session</button>`;
+  $('#codebar').innerHTML=`<div class="code">${CODE}</div><div class="joinurl">Students go to<br><b>${esc(studentURL().replace(/^https?:\/\//,''))}</b></div><div class="count">👥 ${n} joined · ${on} online</div>`;
+  $('#frz').onclick=()=>DB.update(`${base()}/state`,{freeze:!ST.freeze});
+  $('#pvBtn').onclick=()=>setPv(!pvOn);
+  renderPvBar();
+  $('#hide').onclick=()=>{hide=!hide;LS.set('cannon:hide',hide);renderAll();};
+  $('#end').onclick=async()=>{ if(!confirm('End this session? All student work in it will be deleted.')) return; await DB.remove(base()); LS.del('cannon:teacher'); landing('Session ended.'); };
+}
+const STG=[{n:1,t:'Sky bound',s:'No gravity'},{n:2,t:'Turn on gravity',s:'Tracking a cannonball'},{n:3,t:'Another cannonball',s:'50 + 312t − 16t²'},{n:4,t:'Domain detective',s:'Domain, vertex, zeros'}];
+function renderBody(){
+  if(!CODE) return; const R=real(), here=n=>R.filter(s=>(s.stage||1)===n).length;
+  $('#app').innerHTML=`<div class="phases">${STG.map(p=>`<div class="ph ${ST.stage===p.n?'cur':''}"><h3>Stage ${p.n}: ${p.t}</h3><small>${p.s}</small>
+    <span class="here">${here(p.n)} student${here(p.n)===1?'':'s'} on this stage</span>
+    ${ST.stage===p.n?'<button class="btn" disabled>✓ Class is open to here</button>':`<button class="btn ${p.n>ST.stage?'primary':''}" data-move="${p.n}">${p.n>ST.stage?'Open & move class here →':'Move class back here'}</button>`}</div>`).join('')}</div>
+    <div class="tabs">${STG.map(p=>`<button class="tab ${tab===p.n?'on':''}" data-tab="${p.n}">Stage ${p.n} work</button>`).join('')}<button class="tab ${tab===5?'on':''}" data-tab="5">Roster (${R.length})</button></div><div id="view"></div>`;
+  $$('[data-move]').forEach(b=>b.onclick=()=>DB.update(`${base()}/state`,{stage:+b.dataset.move}));
+  $$('[data-tab]').forEach(b=>b.onclick=()=>{tab=+b.dataset.tab;userTab=true;renderBody();});
+  [null,v1,v2,v3,v4,v5][tab]();
+}
+const V=h=>{$('#view').innerHTML=h;};
+const none=()=>'<div class="empty">No students have joined yet. Put the code on the board!</div>';
+function tally(title,R,get,opts,correct,note){
+  const cnt={}; opts.forEach(o=>cnt[o.id]=0); let n0=0;
+  R.forEach(s=>{const v=get(s); if(v!=null&&cnt[v]!=null) cnt[v]++; else n0++;});
+  const mx=Math.max(1,...Object.values(cnt));
+  return `<div class="card"><h2>${title}</h2><div class="bars">${opts.map(o=>`<div class="row"><span>${o.label}</span><div class="bar"><i class="${o.id===correct?'ok':'no'}" style="width:${cnt[o.id]/mx*100}%"></i></div><b>${cnt[o.id]}</b></div>`).join('')}</div>
+    <p class="note">${n0?`${n0} haven't answered yet. `:''}Counts show each student's latest answer (green = correct).${note?' '+note:''}</p></div>`;
+}
+const eqCell=(ok,txt,n)=>!txt?'<span class="dim">—</span>':`<span class="eq ${ok?'ok':'no'}">${pretty(txt)}</span>${ok?' ✓':''}${n>1?` <span class="tries">(${n} tries)</span>`:''}`;
+function wrongList(R,get,okGet,finalGet){
+  const w={}; R.forEach(s=>{(get(s)||[]).forEach(t=>{ if(okGet(s)&&t===finalGet(s)) return; const k=pretty(t); if(k) w[k]=(w[k]||0)+1; });});
+  return Object.entries(w).sort((a,b)=>b[1]-a[1]).slice(0,8);
+}
+
+/* Stage 1 */
+function v1(){
+  const R=real(); if(!R.length) return V(none());
+  const w=s=>s.work.s1||{};
+  const wl=wrongList(R,s=>w(s).eqTries,s=>w(s).eqOk,s=>w(s).eq);
+  V(`<div class="pills"><span class="pill">Table done: <b>${R.filter(s=>w(s).tblOk).length} / ${R.length}</b></span><span class="pill">d = 10 + 406t: <b>${R.filter(s=>w(s).eqOk).length}</b></span></div>
+  <div class="grid2">${tally('What does 406 feet per second mean?',R,s=>w(s).vel,[{id:'up',label:'Rises 406 ft every second'},{id:'high',label:'It is 406 ft high'},{id:'time',label:'Flies for 406 seconds'}],'up')}
+  ${tally('With no gravity, what domain makes sense?',R,s=>w(s).dom,[{id:'all',label:'All real numbers'},{id:'ge0',label:'t ≥ 0'},{id:'05',label:'0 ≤ t ≤ 5'}],'ge0','The 0 ≤ t ≤ 5 students are thinking about the table, not the situation.')}</div>
+  <div class="grid2" style="margin-top:14px"><div class="card"><h2>No-gravity equations</h2><div style="overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Equation</th></tr></thead><tbody>
+    ${R.map(s=>{const p=w(s),tr=p.eqTries||[];return `<tr><td>${nameOf(s)}</td><td>${eqCell(p.eqOk,p.eqOk?p.eq:tr[tr.length-1],tr.length)}</td></tr>`;}).join('')}</tbody></table></div></div>
+  <div class="card"><h2>Common wrong equations</h2>${wl.length?`<table class="tbl"><tbody>${wl.map(([k,n])=>`<tr><td class="eq no">d = ${k}</td><td class="c"><b>${n}</b></td></tr>`).join('')}</tbody></table>`:'<div class="empty">None yet.</div>'}</div></div>`);
+}
+/* Stage 2 */
+function v2(){
+  const R=real(); if(!R.length) return V(none());
+  const w=s=>s.work.s2||{};
+  const wl=wrongList(R,s=>w(s).eqTries,s=>w(s).eqOk,s=>w(s).eq);
+  const notes=R.filter(s=>(w(s).notice||'').trim());
+  V(`<div class="pills"><span class="pill">Found the differences: <b>${R.filter(s=>w(s).diffOk).length} / ${R.length}</b></span><span class="pill">Connected to 16t²: <b>${R.filter(s=>w(s).seen==='fall').length}</b></span><span class="pill">d = 10 + 406t − 16t²: <b>${R.filter(s=>w(s).eqOk).length}</b></span></div>
+  <div class="grid2">${tally('Where have we seen 16, 64, 144, 256, 400?',R,s=>w(s).seen,[{id:'fall',label:'Falling from the Sky (16t²)'},{id:'garden',label:"Noah's Garden areas"},{id:'exp',label:'Exponential pattern'}],'fall')}
+  <div class="card"><h2>Common wrong equations</h2>${wl.length?`<table class="tbl"><tbody>${wl.map(([k,n])=>`<tr><td class="eq no">d = ${k}</td><td class="c"><b>${n}</b></td></tr>`).join('')}</tbody></table>`:'<div class="empty">None yet.</div>'}
+    <p class="note">Watch for 10 + 406t + 16t² (gravity added instead of subtracted) and 406t − 16t² (forgot the 10 ft).</p></div></div>
+  <div class="grid2" style="margin-top:14px"><div class="card"><h2>Equations with gravity</h2><div style="overflow:auto"><table class="tbl"><thead><tr><th>Student</th><th>Equation</th></tr></thead><tbody>
+    ${R.map(s=>{const p=w(s),tr=p.eqTries||[];return `<tr><td>${nameOf(s)}</td><td>${eqCell(p.eqOk,p.eqOk?p.eq:tr[tr.length-1],tr.length)}</td></tr>`;}).join('')}</tbody></table></div></div>
+  <div class="card"><h2>How are the graphs alike and different?</h2>${notes.length?notes.map(s=>`<p style="margin:0 0 10px"><b>${nameOf(s)}:</b> ${esc(w(s).notice)}</p>`).join(''):'<div class="empty">No responses yet.</div>'}</div></div>`);
+}
+/* Stage 3 */
+function v3(){
+  const R=real(); if(!R.length) return V(none());
+  const w=s=>s.work.s3||{};
+  const est=R.filter(s=>w(s).estDone).map(s=>({s,H:parseFloat(w(s).estH),T:parseFloat(w(s).estT)})).sort((a,b)=>Math.abs(a.H-1571)-Math.abs(b.H-1571));
+  const anyFired=R.some(s=>w(s).fired);
+  V(`<div class="pills"><span class="pill">Matched the terms: <b>${R.filter(s=>w(s).matchOk).length}</b></span><span class="pill">Estimated: <b>${est.length}</b></span><span class="pill">Landing time: <b>${R.filter(s=>w(s).landOk).length}</b></span><span class="pill">Domain: <b>${R.filter(s=>w(s).dom==='land').length}</b></span><span class="pill">Range: <b>${R.filter(s=>w(s).rng==='0max').length}</b></span></div>
+  <div class="grid2"><div class="card"><h2>Max-height estimates</h2>${est.length?`<table class="tbl"><thead><tr><th>Student</th><th class="c">Height (ft)</th><th class="c">Time (s)</th>${anyFired?'<th class="c">Off by</th>':''}</tr></thead><tbody>
+      ${est.map((e,i)=>`<tr style="${anyFired&&i===0?'background:#FFF1E6':''}"><td>${nameOf(e.s)}${anyFired&&i===0?' 🏆':''}</td><td class="c">${isFinite(e.H)?e.H.toLocaleString():'—'}</td><td class="c">${isFinite(e.T)?e.T:'—'}</td>${anyFired?`<td class="c">${isFinite(e.H)?Math.round(Math.abs(e.H-1571)).toLocaleString():'—'}</td>`:''}</tr>`).join('')}</tbody></table>`:'<div class="empty">No estimates yet.</div>'}
+      <p class="note">Actual: about 1,571 ft at t = 9.75 s. Lands at about 19.7 s. Why isn't 19.7 exactly double 9.75? It started 50 ft up.</p></div>
+    <div class="stack">${tally('What domain is appropriate?',R,s=>w(s).dom,[{id:'all',label:'All real numbers'},{id:'ge0',label:'t ≥ 0'},{id:'land',label:'0 ≤ t ≤ 19.7'},{id:'25',label:'0 ≤ t ≤ 25'}],'land','0 ≤ t ≤ 25 is the graphing window, not the situation.')}
+    ${tally('What range is appropriate?',R,s=>w(s).rng,[{id:'0max',label:'0 ≤ d ≤ 1,571'},{id:'50max',label:'50 ≤ d ≤ 1,571'},{id:'ge0',label:'d ≥ 0'},{id:'2000',label:'0 ≤ d ≤ 2,000'}],'0max','50 ≤ d forgets that the ball comes back down to the ground.')}</div></div>`);
+}
+/* Stage 4 */
+const CARDS=[{id:'garden',t:"🌱 Noah's garden",dom:'0 ≤ L ≤ 25',opts:['All real numbers','L ≥ 0','0 ≤ L ≤ 25','0 ≤ L ≤ 50'],ans:2},
+  {id:'fall',t:'🪨 Distance fallen',dom:'0 ≤ t ≤ 6',opts:['All real numbers','t ≥ 0','0 ≤ t ≤ 6','0 ≤ t ≤ 576'],ans:2},
+  {id:'height',t:'🏢 Height above ground',dom:'0 ≤ t ≤ 6',opts:['All real numbers','t ≥ 0','0 ≤ t ≤ 6','−6 ≤ t ≤ 6'],ans:2},
+  {id:'profit',t:'💊 Insulin profit',dom:'0 < v < 500 (positive)',opts:['0 < v < 500','0 < v < 250','v > 250','v > 500'],ans:0}];
+const KS=['dom','ver','zer'], ANS={dom:null,ver:0,zer:0};
+function v4(){
+  const R=real(); if(!R.length) return V(none());
+  const a=s=>((s.work.s4||{}).a)||{};
+  const ok=(s,c,k)=>a(s)[c.id+k]===(k==='dom'?c.ans:0);
+  V(`<div class="card"><h2>Progress by function</h2><p class="note" style="margin:0 0 8px">Each bar = domain · vertex · zeros. Jigsaw idea: assign one function to each pair, then share out.</p><div style="overflow:auto"><table class="tbl"><thead><tr><th>Student</th>${CARDS.map(c=>`<th class="c">${c.t}</th>`).join('')}</tr></thead><tbody>
+    ${R.map(s=>`<tr><td>${nameOf(s)}</td>${CARDS.map(c=>`<td class="c"><span class="steps">${KS.map(k=>`<i class="${ok(s,c,k)?'on':''}"></i>`).join('')}</span></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+  <div class="grid2" style="margin-top:14px">${CARDS.map(c=>tally(`${c.t}: ${c.id==='profit'?'where is it positive?':'domain'}`,R,s=>{const v=a(s)[c.id+'dom'];return v==null?null:String(v);},c.opts.map((o,j)=>({id:String(j),label:o})),String(c.ans))).join('')}</div>`);
+}
+/* Roster */
+function v5(){
+  const R=roster(); if(!R.length) return V(none());
+  const ago=t=>{if(!t)return '—';const s=Math.round((DB.now()-t)/1000);return s<60?'just now':s<3600?Math.round(s/60)+' min ago':'over an hour ago';};
+  V(`<div class="card"><h2>Roster</h2><table class="tbl"><thead><tr><th>Student</th><th class="c">On stage</th><th>Last active</th><th></th></tr></thead><tbody>
+    ${R.map(s=>`<tr><td><span class="online ${online(s)?'y':''}"></span>${nameOf(s)}</td><td class="c">${s.stage||1}</td><td>${ago(s.seen)}</td><td style="text-align:right"><button class="btn danger" data-kick="${s.sid}">Remove</button></td></tr>`).join('')}
+  </tbody></table><p class="note">Remove a duplicate or misspelled name. That student goes back to the join screen. A student who rejoins with the same name gets their work back.</p></div>`);
+  $$('[data-kick]').forEach(b=>b.onclick=async()=>{ if(!confirm('Remove this student and their work from the session?')) return; await DB.set(`${base()}/kicked/${b.dataset.kick}`,true); await DB.remove(`${base()}/students/${b.dataset.kick}`); });
+}
+landing();
+})();
+</script>
+</body>
+</html>
