@@ -85,7 +85,8 @@ select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--lin
 .tbl input{width:100%;max-width:90px;font:inherit;padding:5px;border:2px solid var(--line);border-radius:8px;text-align:center}
 .tbl .dim{color:#B5BFCC}
 
-.qstep{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;animation:pop .35s}
+.qstep{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff}
+.qstep.fresh{animation:pop .35s}
 .qstep.doneStep{background:#F7FBF8;border-color:#CDE9D7}
 .qstep h4{margin:0 0 6px;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;justify-content:space-between}
 .qstep h4 .ck{color:var(--good)}
@@ -558,7 +559,7 @@ function upd2(scroll){
     else if(pr) m=`Test it! When t = 3, your rule gives ${fmt(pr.f(3))}, but the rock had fallen 144 ft. Your try is graphed in red.`;
     fbSet('fbEq','no',m);};
   const n3=$('#to3'); if(n3) n3.onclick=()=>go(3);
-  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.scrollIntoView({behavior:'smooth',block:'nearest'});const inp=last.querySelector('input:not([readonly])');if(inp)setTimeout(()=>inp.focus({preventScroll:true}),300);}}
+  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.classList.add('fresh');last.scrollIntoView({behavior:'smooth',block:'nearest'});const inp=last.querySelector('input:not([readonly])');if(inp)setTimeout(()=>inp.focus({preventScroll:true}),300);}}
 }
 
 /* =====================================================================
@@ -617,7 +618,7 @@ function upd3(scroll){
     if(v===11){s.crossOk=true;unlock(4);persist();upd3(true);return;} mark(el,false);persist();
     fbSet('fbCr','no',v===10?'Close! At t = 10, 2ᵗ = 1,024 but 16t² = 1,600. Still behind.':v<10?'Slide to that value of t and compare. Is 2ᵗ really bigger yet?':'It passes before that. Slide back and find the first t where 2ᵗ is ahead.');};
   const n4=$('#to4'); if(n4) n4.onclick=()=>go(4);
-  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.classList.add('fresh');}if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});}
 }
 
 /* =====================================================================
@@ -701,7 +702,7 @@ function upd4(scroll){
   const c2=$('#cC2'); if(c2) c2.onclick=()=>{const el=$('#eC2'),t=el.value.trim();s.cd2Try=t;if(t)pushTry(s.cd2Tries,t);const pr=tryParse(t);
     if(pr&&pr.hasVar&&equiv(pr.f,x=>906-16*x*x)){s.cd2=t;s.cd2Ok=true;persist();upd4(true);return;} mark(el,false);persist();
     fbSet('fbC2','no',pr&&equiv(pr.f,hgt)?'That\'s for the 576-foot drop. This one starts at 906 ft.':pr&&pr.hasVar?`Test it: when t = 2, your function gives ${fmt(pr.f(2))}, but the height is 842 ft.`:'Use t for time, like Diego\'s equation.');};
-  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.scrollIntoView({behavior:'smooth',block:'nearest'});const inp=last.querySelector('input:not([readonly])');if(inp)setTimeout(()=>inp.focus({preventScroll:true}),300);}}
+  if(scroll){const st=$$('.qstep',P),last=st[st.length-1];if(last){last.classList.add('fresh');last.scrollIntoView({behavior:'smooth',block:'nearest'});const inp=last.querySelector('input:not([readonly])');if(inp)setTimeout(()=>inp.focus({preventScroll:true}),300);}}
 }
 
 (function boot(){
