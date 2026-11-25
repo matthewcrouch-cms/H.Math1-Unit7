@@ -178,7 +178,7 @@ footer a{color:var(--muted)}
   </div>
   <span class="grip">◢</span>
 </div>
-<div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Mr. Crouch paused the screens.</small></div></div>
+<div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Your teacher paused the screens.</small></div></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
@@ -287,7 +287,7 @@ async function joinLive(code,name,demo){
   err('Joining…');
   try{
     const st=await DB.once(`sessions/${code}/state`);
-    if(!st) return err('No class found with that code. Check with Mr. Crouch.');
+    if(!st) return err('No class found with that code. Check with your teacher.');
     if((await DB.once(`sessions/${code}/app`))!==APP) return err('That code is for a different activity.');
     const studs=await DB.once(`sessions/${code}/students`)||{};
     const saved=LS.get('fallingSky:live');
@@ -299,7 +299,7 @@ async function joinLive(code,name,demo){
     state=merge(work); firstState=true;
     await DB.update(`sessions/${code}/students/${sid}`,{name,demo:!!demo,stage:state.stage,joined:DB.ts(),seen:DB.ts(),work:JSON.parse(JSON.stringify(state))});
     startLive();
-  }catch(e){ err('Could not connect. Ask Mr. Crouch to check the setup.'); }
+  }catch(e){ err('Could not connect. Ask your teacher to check the setup.'); }
 }
 function startLive(){
   cleanup();
@@ -345,7 +345,7 @@ function renderSteps(){
 }
 function go(n){if(n>maxStage())return;stopSim();state.stage=n;persist();render();window.scrollTo({top:0,behavior:'smooth'});}
 function unlock(n){if(LIVE)return;state.unlocked=Math.max(state.unlocked,n);persist();renderSteps();}
-function nextBtn(n,label,id){ if(n<=maxStage()) return `<button class="btn primary big" id="${id}">${label}</button>`; return `<div class="waitbox">⏳ Nice work! Mr. Crouch will open Stage ${n} soon.</div>`; }
+function nextBtn(n,label,id){ if(n<=maxStage()) return `<button class="btn primary big" id="${id}">${label}</button>`; return `<div class="waitbox">⏳ Nice work! Your teacher will open Stage ${n} soon.</div>`; }
 function render(){renderSteps();renderHeader();[null,buildS1,buildS2,buildS3,buildS4][state.stage]();}
 
 /* ---------- falling scene ---------- */

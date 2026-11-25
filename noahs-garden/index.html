@@ -242,7 +242,7 @@ input.ok{border-color:var(--good);background:#EAF8F0} input.no{border-color:var(
 </header>
 <main id="stage"></main>
 <footer>Honors Math 1 · Unit 7 Lesson 1 · A Different Kind of Change · <a href="teacher.html">Teacher dashboard</a></footer>
-<div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Mr. Crouch paused the screens.</small></div></div>
+<div class="freeze" id="freeze" hidden><div>👀 Eyes up front!<small>Your teacher paused the screens.</small></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -372,7 +372,7 @@ async function joinLive(code,name,demo){
   err('Joining…');
   try{
     const st=await DB.once(`sessions/${code}/state`);
-    if(!st) return err('No class found with that code. Check with Mr. Crouch.');
+    if(!st) return err('No class found with that code. Check with your teacher.');
     const app=await DB.once(`sessions/${code}/app`);
     if(app!==APP) return err('That code is for a different activity.');
     const studs=await DB.once(`sessions/${code}/students`)||{};
@@ -386,7 +386,7 @@ async function joinLive(code,name,demo){
     state=merge(work); firstState=true;
     await DB.update(`sessions/${code}/students/${sid}`,{name,demo:!!demo,phase:state.phase,joined:DB.ts(),seen:DB.ts(),work:JSON.parse(JSON.stringify(state))});
     startLive();
-  }catch(e){ err('Could not connect. Ask Mr. Crouch to check the setup.'); }
+  }catch(e){ err('Could not connect. Ask your teacher to check the setup.'); }
 }
 function startLive(){
   cleanup();
@@ -432,7 +432,7 @@ function go(n){ if(n>maxPhase()) return; stopTimer(); state.phase=n; persist(); 
 function unlock(n){ if(!LIVE){ state.unlocked=Math.max(state.unlocked,n); persist(); renderSteps(); } }
 function nextBtn(n,label){
   if(n<=maxPhase()) return `<button class="btn primary big" data-next="${n}">${label}</button>`;
-  return `<div class="waitbox">⏳ Nice work! Mr. Crouch will open Phase ${n} soon.</div>`;
+  return `<div class="waitbox">⏳ Nice work! Your teacher will open Phase ${n} soon.</div>`;
 }
 function bindNext(root=document){ $$('[data-next]',root).forEach(b=>b.onclick=()=>go(+b.dataset.next)); }
 function render(){ renderSteps(); renderHeader(); [null,buildP1,buildP2,buildP3,buildP4][state.phase](); }
@@ -553,7 +553,7 @@ function buildP2(){
   const s=state.p2;
   $('#stage').innerHTML=`<section>
     <div class="intro"><span class="tag">Phase 2</span><h2>The biggest-garden challenge</h2>
-    <p>Noah wants as much room to plant as possible. The fence is now locked at <b>50 m</b>: change the length and the width adjusts on its own. ${LIVE?'When Mr. Crouch starts the challenge':'When you press Start'}, you have <b id="durTxt">${curDur()} seconds</b> to find the rectangle you think has the <b>largest area</b> and submit it. <b>The app won't tell you the area.</b> Count squares, calculate, or estimate!</p></div>
+    <p>Noah wants as much room to plant as possible. The fence is now locked at <b>50 m</b>: change the length and the width adjusts on its own. ${LIVE?'When your teacher starts the challenge':'When you press Start'}, you have <b id="durTxt">${curDur()} seconds</b> to find the rectangle you think has the <b>largest area</b> and submit it. <b>The app won't tell you the area.</b> Count squares, calculate, or estimate!</p></div>
     <div class="split">
       <div class="card"><div class="gwrap">${gardenMarkup()}<div class="overlay" id="ov"></div></div><p class="hint">Each small square is 1 m². The area is the number of squares inside.</p></div>
       <div class="card panel">
@@ -627,9 +627,9 @@ function updP2(){
     const k=p2Status(), r=CLS.p2;
     sb.style.display='none';
     ov.innerHTML = k==='ready'?`<div>Get ready…<div class="cd" id="cd">${Math.ceil((r.startsAt-DB.now())/1000)}</div><small>Round ${r.round}</small></div>`
-      : k==='done'?(lr?`<div>Your garden: ${fmt(last.A)} m²<br><small>Check Mr. Crouch's screen to see who was closest!</small></div>`:`<div>Submitted: ${last?fmt(last.L)+' × '+fmt(last.W):'?'}<br><small>Mr. Crouch will reveal who was closest!</small></div>`)
+      : k==='done'?(lr?`<div>Your garden: ${fmt(last.A)} m²<br><small>Check your teacher's screen to see who was closest!</small></div>`:`<div>Submitted: ${last?fmt(last.L)+' × '+fmt(last.W):'?'}<br><small>Your teacher will reveal who was closest!</small></div>`)
       : k==='over'?`<div>That round is over.<br><small>Get ready for the next one!</small></div>`
-      : `<div>⏳ Waiting for Mr. Crouch to start the challenge<br><small>Be ready: you'll have ${curDur()} seconds.</small></div>`;
+      : `<div>⏳ Waiting for your teacher to start the challenge<br><small>Be ready: you'll have ${curDur()} seconds.</small></div>`;
     if(k==='run') ov.innerHTML='';
     const dt=$('#durTxt'); if(dt) dt.textContent=curDur()+' seconds';
   } else {
@@ -659,7 +659,7 @@ function renderResults(justNow){
     <div class="result ${justNow?'pop':''}">
       <div><small>${last.auto?"Time's up! Submitted":'You submitted'}</small><b>${fmt(last.L)} × ${fmt(last.W)}${lr?` = ${fmt(last.A)} m²`:''}</b>${last.est!=null?`<small style="margin-top:4px">Your area: ${fmt(last.est)} m²${lr?(last.est===last.A?' ✓':' ✗'):''}</small>`:''}</div>
       ${lr?(top?`<div><small>Biggest in class</small><b>${fmt(top.L)} × ${fmt(top.W)} = ${fmt(top.A)} m²</b></div>`:(best?`<div><small>Your best (${s.attempts.length} ${s.attempts.length===1?'try':'tries'})</small><b>${fmt(best.L)} × ${fmt(best.W)} = ${fmt(best.A)} m²</b></div>`:''))
-        :`<div><small>Area</small><b>Hidden until Mr. Crouch reveals</b></div>`}
+        :`<div><small>Area</small><b>Hidden until your teacher reveals</b></div>`}
     </div>
     ${lr?`<details class="meas"><summary>Rectangles you tried (${meas.length})</summary>
       <div class="scroll"><table class="tbl"><thead><tr><th>Length (m)</th><th>Width (m)</th><th>Area (m²)</th></tr></thead><tbody>${

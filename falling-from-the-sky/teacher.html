@@ -182,13 +182,13 @@ function nameOf(s){ if(s.demo) return esc(s.name)+' <span class="tag">you</span>
 const online=s=>s.seen&&DB.now()-s.seen<75000;
 
 function renderAll(){ renderHeader(); renderBody(); }
-// In-dashboard student preview. It joins as "Mr. Crouch" (a demo student: not counted, and never frozen).
+// In-dashboard student preview. It joins as "Teacher" (a demo student: not counted, and never frozen).
 function sizePv(){ const f=$('#pvf'); if(!pvOn||!f) return; f.style.height=Math.max(400,window.innerHeight-f.getBoundingClientRect().top-4)+'px'; }
 window.addEventListener('resize',sizePv);
 function setPv(on){
   pvOn=!!on; const pv=$('#pv'), app=$('#app'); if(!pv) return;
   pv.classList.toggle('on',pvOn); app.style.display=pvOn?'none':'';
-  if(pvOn){ const f=$('#pvf'); if(!f.getAttribute('src')) f.src=`${studentURL()}?code=${CODE}&name=${encodeURIComponent('Mr. Crouch')}&demo=1`; }
+  if(pvOn){ const f=$('#pvf'); if(!f.getAttribute('src')) f.src=`${studentURL()}?code=${CODE}&name=${encodeURIComponent('Teacher')}&demo=1`; }
   if(CODE){ renderHeader(); } setTimeout(sizePv,0); window.scrollTo({top:0});
 }
 function renderPvBar(){

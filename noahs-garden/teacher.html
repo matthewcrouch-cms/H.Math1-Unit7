@@ -207,7 +207,7 @@ function renderAll(){ renderHeader(); renderBody(); }
 function renderHeader(){
   const n=real().length, on=real().filter(online).length;
   $('#hb').innerHTML=`
-    <a class="hbtn" target="_blank" href="${esc(studentURL())}?code=${CODE}&name=${encodeURIComponent('Mr. Crouch')}&demo=1">👁 View as student</a>
+    <a class="hbtn" target="_blank" href="${esc(studentURL())}?code=${CODE}&name=${encodeURIComponent('Teacher')}&demo=1">👁 View as student</a>
     <button class="hbtn ${ST.freeze?'on':''}" id="frz">${ST.freeze?'▶ Unfreeze screens':'⏸ Freeze screens'}</button>
     <button class="hbtn ${hide?'on':''}" id="hide">${hide?'Show names':'Hide names'}</button>
     <button class="hbtn" id="end">End session</button>`;
