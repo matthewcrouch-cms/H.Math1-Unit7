@@ -1085,5 +1085,57 @@ function updP4(scroll){
 })();
 })();
 </script>
+<!-- Calculator boxes: number boxes can do arithmetic (e.g. 100+300 → 400, 16(6)^2 → 576). Equation boxes (.ex) are left alone. -->
+<style>
+.calcTip{position:fixed;z-index:70;background:#13294B;color:#fff;font:600 .85rem Lexend,system-ui,sans-serif;padding:4px 10px;border-radius:8px;pointer-events:none;white-space:nowrap;box-shadow:0 4px 14px rgba(19,41,75,.25)}
+.calcTip b{color:#FFD2B0;font-size:.95rem}
+.calcTip small{opacity:.75;font-weight:400;margin-left:6px}
+.calcTip::before{content:"";position:absolute;top:-5px;left:14px;border:5px solid transparent;border-top:0;border-bottom-color:#13294B}
+</style>
+<script>
+(function(){
+  function evalArith(src){
+    let s=String(src||'').replace(/\s+/g,'').replace(/[−–—]/g,'-').replace(/[×·•∙xX*]/g,'*').replace(/÷/g,'/').replace(/²/g,'^2').replace(/³/g,'^3').replace(/,(?=\d{3}(\D|$))/g,'');
+    if(!s||!/^[0-9.+\-*/^()√]+$/.test(s)) return null;
+    if(/^-?\d*\.?\d+$/.test(s)) return null;               // already just a number
+    const t=[];let i=0;
+    while(i<s.length){const c=s[i];
+      if(/[0-9.]/.test(c)){let j=i;while(j<s.length&&/[0-9.]/.test(s[j]))j++;const v=parseFloat(s.slice(i,j));if(isNaN(v)||(s.slice(i,j).split('.').length>2))return null;t.push({k:'n',v});i=j;continue;}
+      t.push({k:c});i++;}
+    const o=[];t.forEach((b,k)=>{const a=t[k-1];if(a&&(a.k==='n'||a.k===')')&&(b.k==='n'||b.k==='('||b.k==='√'))o.push({k:'*'});o.push(b);});
+    let p=0;const pk=()=>o[p],eat=k=>{if(o[p]&&o[p].k===k){p++;return true;}return false;};
+    function E(){let v=T();while(pk()&&(pk().k==='+'||pk().k==='-')){const op=o[p++].k,w=T();v=op==='+'?v+w:v-w;}return v;}
+    function T(){let v=U();while(pk()&&(pk().k==='*'||pk().k==='/')){const op=o[p++].k,w=U();v=op==='*'?v*w:v/w;}return v;}
+    function U(){if(eat('-'))return -U();if(eat('+'))return U();if(eat('√'))return Math.sqrt(U());return P();}
+    function P(){const b=A();if(eat('^'))return Math.pow(b,U());return b;}
+    function A(){const x=o[p++];if(!x)throw 0;if(x.k==='n')return x.v;if(x.k==='('){const v=E();if(!eat(')'))throw 0;return v;}throw 0;}
+    try{const v=E();if(p!==o.length||!isFinite(v))return null;return Math.round(v*1e6)/1e6;}catch(e){return null;}
+  }
+  const isCalcBox=el=>el&&el.tagName==='INPUT'&&!el.readOnly&&!el.classList.contains('ex')&&/^(decimal|numeric)$/.test(el.getAttribute('inputmode')||'');
+  const tip=document.createElement('div');tip.className='calcTip';tip.hidden=true;document.body.appendChild(tip);
+  let cur=null;
+  function show(el){
+    const v=evalArith(el.value);
+    if(v==null){tip.hidden=true;return;}
+    tip.innerHTML=`= <b>${String(v)}</b><small>press Enter</small>`;
+    const r=el.getBoundingClientRect();tip.style.left=Math.max(4,r.left)+'px';tip.style.top=(r.bottom+6)+'px';tip.hidden=false;
+  }
+  function commit(el){
+    const v=evalArith(el.value); tip.hidden=true;
+    if(v==null) return false;
+    el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));
+    return true;
+  }
+  document.addEventListener('input',e=>{ if(isCalcBox(e.target)){cur=e.target;show(e.target);} },true);
+  document.addEventListener('focusin',e=>{ if(isCalcBox(e.target)){cur=e.target;show(e.target);} });
+  document.addEventListener('focusout',e=>{ if(isCalcBox(e.target)){commit(e.target);cur=null;} });
+  document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&isCalcBox(e.target)&&evalArith(e.target.value)!=null){ e.preventDefault(); e.stopPropagation(); commit(e.target); show(e.target); } },true);
+  // Clicking Check counts too: convert before the click handler reads the box
+  document.addEventListener('pointerdown',e=>{ if(cur&&e.target!==cur) commit(cur); },true);
+  window.addEventListener('scroll',()=>{ if(cur&&!tip.hidden) show(cur); },true);
+  window.addEventListener('resize',()=>{ if(cur&&!tip.hidden) show(cur); });
+})();
+</script>
+
 </body>
 </html>
